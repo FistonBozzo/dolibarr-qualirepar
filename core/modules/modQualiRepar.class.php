@@ -65,15 +65,16 @@ class modQualiRepar extends DolibarrModules
         $this->module_parts = array(
             'sql' => '/install/mysql/'
         );
-        public function init($options = '')
-        {
-        $result = $this->_load_tables('/install/mysql/');
-
-        if ($result < 0) {
-            return -1;
-            }
-
-        return $this->_init($options);
-        }    
     }
+    public function init($options = '')
+    {
+    $result = $this->_load_tables('/install/mysql/');
+
+    if ($result < 0) {
+        return -1;
+        }
+
+    return $this->_init($options);
+    }    
+
 }
