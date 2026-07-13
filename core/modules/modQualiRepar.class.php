@@ -9,25 +9,64 @@ class modQualiRepar extends DolibarrModules
 {
     public function __construct($db)
     {
+        global $conf;
+
         $this->db = $db;
 
+        // Identifiant du module
         $this->numero = 500000;
+
+        // Classe des droits
         $this->rights_class = 'qualirepar';
 
+        // Famille dans la page des modules
         $this->family = "other";
+
         $this->module_position = '90';
 
+        // Informations du module
         $this->name = 'QualiRepar';
         $this->description = 'Gestion du bonus réparation QualiRépar';
 
-        $this->version = '0.1.0';
+        $this->version = '0.2.0';
 
+        // Constante d'activation
         $this->const_name = 'MAIN_MODULE_QUALIREPAR';
 
+        // Icône
         $this->picto = 'bill';
 
+        // Fichiers de langue
         $this->langfiles = array("qualirepar@qualirepar");
 
+
+        /*
+         * Tables SQL du module
+         *
+         * Les fichiers sont dans :
+         * qualirepar/sql/
+         */
+        $this->module_parts = array(
+            'models' => 1
+        );
+
         $this->dirs = array();
+
+
+        /*
+         * Permissions du module
+         * (on les utilisera plus tard)
+         */
+        $this->rights = array();
+
+
+        /*
+         * Scripts SQL d'installation
+         */
+        $this->sql = array(
+            '/qualirepar/sql/llx_qualirepar_bareme.sql',
+            '/qualirepar/sql/llx_qualirepar_ecoorganisme.sql',
+            '/qualirepar/sql/llx_qualirepar_bonus.sql'
+        );
     }
 }
