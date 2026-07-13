@@ -19,7 +19,7 @@ class modQualiRepar extends DolibarrModules
         // Classe des droits
         $this->rights_class = 'qualirepar';
 
-        // Famille dans la page des modules
+        // Famille du module
         $this->family = "other";
 
         $this->module_position = '90';
@@ -41,40 +41,36 @@ class modQualiRepar extends DolibarrModules
 
 
         /*
-         * Tables SQL du module
-         *
-         * Les fichiers sont dans :
-         * qualirepar/sql/
-         */
-        $this->module_parts = array(
-            'models' => 1
-        );
-
-        $this->dirs = array();
-
-
-        /*
-         * Permissions du module
-         * (on les utilisera plus tard)
-         */
-        $this->rights = array();
-
-        /*
-         * Scripts SQL d'installation
+         * Répertoire d'installation SQL
          */
         $this->module_parts = array(
             'sql' => '/install/mysql/'
         );
+
+        /*
+         * Répertoires créés à l'installation
+         */
+        $this->dirs = array();
+
+
+        /*
+         * Droits (à compléter plus tard)
+         */
+        $this->rights = array();
     }
+
+
+    /**
+     * Installation du module
+     */
     public function init($options = '')
     {
-    $result = $this->_load_tables('/install/mysql/');
+        $result = $this->_load_tables('/install/mysql/');
 
-    if ($result < 0) {
-        return -1;
+        if ($result < 0) {
+            return -1;
         }
 
-    return $this->_init($options);
-    }    
-
+        return $this->_init($options);
+    }
 }
