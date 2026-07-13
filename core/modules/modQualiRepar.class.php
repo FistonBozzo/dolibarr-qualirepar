@@ -59,14 +59,11 @@ class modQualiRepar extends DolibarrModules
          */
         $this->rights = array();
 
-
         /*
          * Scripts SQL d'installation
          */
-        $this->sql = array(
-            '/qualirepar/sql/llx_qualirepar_bareme.sql',
-            '/qualirepar/sql/llx_qualirepar_ecoorganisme.sql',
-            '/qualirepar/sql/llx_qualirepar_bonus.sql'
+        $this->module_parts = array(
+            'sql' => '/install/mysql/'
         );
     }
 }
