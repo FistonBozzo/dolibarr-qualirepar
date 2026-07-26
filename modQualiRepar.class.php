@@ -78,10 +78,53 @@ class modQualiRepar extends DolibarrModules
     }
 
     // Fonction d'initialisation (optionnelle)
-    public function init($options = '')
-    {
-        global $conf, $langs;
-        $sql = array();
-        return $this->_init($sql, $options);
+   public function init($options = '')
+{
+    require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+
+    $sql = array();
+
+    $result = $this->_init($sql, $options);
+
+    if ($result > 0) {
+
+        $extrafields = new ExtraFields($this->db);
+
+        // Montant du bonus réparation
+        if (!$extrafields->fetch_name_optionals_label('facture', 'bonus_reparation')) {
+            $extrafields->addExtraField(
+                'bonus_reparation',
+                'Bonus réparation',
+                'price',
+                100,
+                '',
+                'facture',
+                0,
+                0,
+                '',
+                '',
+                1
+            );
+        }
+
+        // Afficher ou non le bonus
+        if (!$extrafields->fetch_name_optionals_label('facture', 'afficher_bonus')) {
+            $extrafields->addExtraField(
+                'afficher_bonus',
+                'Afficher le bonus',
+                'boolean',
+                101,
+                '',
+                'facture',
+                0,
+                0,
+                '',
+                '',
+                1
+            );
+        }
     }
+
+    return $result;
+}
 }
