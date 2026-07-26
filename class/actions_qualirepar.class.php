@@ -7,7 +7,7 @@ class ActionsQualiRepar
 
 
     /**
-     * Ajout d'informations sur la facture
+     * Ajout du bonus réparation dans la facture
      */
     public function printInvoiceFooter($parameters, &$object, &$action, $hookmanager)
     {
@@ -17,21 +17,22 @@ class ActionsQualiRepar
             return 0;
         }
 
+        // Charge les champs extra
+        $object->fetch_optionals();
 
         if (
-            !empty($object->array_options['options_afficher_bonus'])
+            !empty($object->array_options['options_afficher_bonus_reparation'])
             &&
             !empty($object->array_options['options_bonus_reparation'])
         ) {
 
             $montant = price($object->array_options['options_bonus_reparation']);
 
-
             $this->resprints .= '
             <table width="100%">
                 <tr>
                     <td align="right">
-                        '.$langs->trans("BonusReparation").'
+                        Bonus réparation QualiRépar
                     </td>
                     <td align="right">
                         -'.$montant.' €
@@ -39,7 +40,6 @@ class ActionsQualiRepar
                 </tr>
             </table>';
         }
-
 
         return 0;
     }
