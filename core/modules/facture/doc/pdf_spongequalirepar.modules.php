@@ -132,7 +132,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 		$langs->loadLangs(array("main", "bills"));
 
 		$this->db = $db;
-		$this->name = "sponge";
+		$this->name = "spongequalirepar";
 		$this->description = $langs->trans('PDFSpongeDescription');
 		$this->update_main_doc_field = 1; // Save the name of generated file as the main doc when generating a doc with this template
 
