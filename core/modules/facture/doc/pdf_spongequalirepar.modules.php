@@ -45,8 +45,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 /**
  *	Class to manage PDF invoice template sponge
  */
-class pdf_sponge extends ModelePDFFactures
-{
+class pdf_spongequalirepar extends ModelePDFFactures{
 	/**
 	 * @var DoliDB Database handler
 	 */
