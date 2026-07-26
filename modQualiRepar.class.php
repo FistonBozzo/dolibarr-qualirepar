@@ -1,130 +1,87 @@
 <?php
-/* Copyright (C) 2026 - QualiRépar Module for Dolibarr
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+/* Copyright (C) 2026 - QualiRépar Module
+ *
+ * Gestion simple du Bonus Réparation
  */
 
-include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
+include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
 class modQualiRepar extends DolibarrModules
 {
     public function __construct($db)
     {
+        global $langs;
+
         $this->db = $db;
 
-        // Identifiants du module
-        $this->numero = 500000;  // Numéro unique (à adapter si conflit)
+        $this->numero = 500000;
         $this->rights_class = 'qualirepar';
+
         $this->family = "other";
         $this->module_position = '90';
 
-        // Informations du module
         $this->name = 'QualiRepar';
-        $this->description = 'Gestion du bonus réparation QualiRépar';
+        $this->description = 'Ajout du Bonus Réparation sur les factures';
         $this->version = '0.1.0';
 
-        // Constantes
         $this->const_name = 'MAIN_MODULE_QUALIREPAR';
-        $this->picto = 'bill';  // Icône (ex: 'bill', 'product', 'user')
 
-        // Fichiers de langue
-        $this->langfiles = array("qualirepar@qualirepar");
+        $this->picto = 'bill';
 
-        // Dossiers
-        $this->dirs = array();
+        $this->langfiles = array(
+            'qualirepar@qualirepar'
+        );
 
-        // Droits
-        $this->rights = array(
-            'qualirepar' => array(
-                'admin' => array(
-                    'lib' => 'Administrer QualiRépar',
-                    'perms' => array('admin'),
-                    'type' => 'admin'
+
+        /*
+         * Hooks utilisés
+         */
+        $this->module_parts = array(
+            'hooks' => array(
+                'pdfgeneration',
+                'invoicecard'
+            )
+        );
+
+
+        /*
+         * Création des champs supplémentaires
+         */
+        $this->extrafields = array(
+            'facture' => array(
+                array(
+                    'name' => 'bonus_reparation',
+                    'label' => 'Bonus réparation',
+                    'type' => 'price'
+                ),
+                array(
+                    'name' => 'afficher_bonus',
+                    'label' => 'Afficher Bonus Réparation',
+                    'type' => 'boolean'
                 )
             )
         );
-
-        // Parties du module
-        $this->module_parts = array(
-            'hooks' => array(
-                'formBuildObject',  // Ajoute des champs dans les formulaires
-                'doActions',        // Actions (validation, etc.)
-                'printObjectLine',  // Affiche des lignes dans les objets (factures)
-                'pdf_generation',   // Génération de PDF
-                'invoicecard'       // Affichage de la carte facture
-            ),
-            'models' => 1
-        );
-
-        // Menu
-        $this->menus = array(
-            array(
-                'fk_menu' => 'top',
-                'type' => 'top',
-                'titre' => 'QualiRépar',
-                'mainmenu' => 'qualirepar',
-                'leftmenu' => 'qualirepar',
-                'url' => '/qualirepar/admin/qualirepar_ecoorganisme.php',
-                'langs' => 'qualirepar@qualirepar',
-                'position' => 100,
-                'enabled' => '$conf->qualirepar->enabled',
-                'perms' => '$user->rights->qualirepar->admin',
-                'target' => '',
-                'user' => 0
-            )
-        );
     }
 
-    // Fonction d'initialisation (optionnelle)
-   public function init($options = '')
-{
-    require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
-    $sql = array();
+    /**
+     * Activation du module
+     */
+    public function init($options = '')
+    {
+        $sql = array();
 
-    $result = $this->_init($sql, $options);
-
-    if ($result > 0) {
-
-        $extrafields = new ExtraFields($this->db);
-
-        // Montant du bonus réparation
-        if (!$extrafields->fetch_name_optionals_label('facture', 'bonus_reparation')) {
-            $extrafields->addExtraField(
-                'bonus_reparation',
-                'Bonus réparation',
-                'price',
-                100,
-                '',
-                'facture',
-                0,
-                0,
-                '',
-                '',
-                1
-            );
-        }
-
-        // Afficher ou non le bonus
-        if (!$extrafields->fetch_name_optionals_label('facture', 'afficher_bonus')) {
-            $extrafields->addExtraField(
-                'afficher_bonus',
-                'Afficher le bonus',
-                'boolean',
-                101,
-                '',
-                'facture',
-                0,
-                0,
-                '',
-                '',
-                1
-            );
-        }
+        return $this->_init($sql, $options);
     }
 
-    return $result;
-}
+
+    /**
+     * Désactivation du module
+     */
+    public function remove($options = '')
+    {
+        $sql = array();
+
+        return $this->_remove($sql, $options);
+    }
 }
