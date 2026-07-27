@@ -2241,7 +2241,35 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 								true
 						);
 				}
-
+				
+				// Total TTC à régler après bonus
+				if (!empty($object->array_options['options_afficher_bonus_reparation'])
+				    && !empty($object->array_options['options_bonus_reparation'])) {
+				
+				        $index++;
+				
+				        $total_a_regler = $total_ttc - $object->array_options['options_bonus_reparation'];
+				
+				        $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+				        $pdf->MultiCell(
+				                $col2x - $col1x,
+				                $tab2_hl,
+				                'Total TTC à régler',
+				                $useborder,
+				                'L',
+				                true
+				        );
+				
+				        $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+				        $pdf->MultiCell(
+				                $largcol2,
+				                $tab2_hl,
+				                price($total_a_regler, 0, $outputlangs),
+				                $useborder,
+				                'R',
+				                true
+				        );
+				}
 				
 				// Retained warranty
 				if ($object->displayRetainedWarranty()) {
