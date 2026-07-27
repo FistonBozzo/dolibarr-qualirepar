@@ -2225,7 +2225,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 						$pdf->MultiCell(
 								$col2x - $col1x,
 								$tab2_hl,
-								'Bonus réparation QualiRépar',
+								'Bonus réparation',
 								$useborder,
 								'L',
 								true
