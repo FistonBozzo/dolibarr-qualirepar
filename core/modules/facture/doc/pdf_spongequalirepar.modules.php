@@ -2210,6 +2210,39 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 					$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $total_ttc_origin, 0, $outputlangs, 1, -1, -1, $mysoc->currency_code), $useborder, 'L', true);
 				}
 
+				// Bonus réparation QualiRépar
+				if (!empty($object->array_options['options_afficher_bonus_reparation'])
+					&& !empty($object->array_options['options_bonus_reparation'])) {
+
+						$index++;
+
+						$montant_bonus = $object->array_options['options_bonus_reparation'];
+
+						$pdf->SetTextColor(40, 40, 40);
+						$pdf->SetFillColor(255, 255, 255);
+
+						$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+						$pdf->MultiCell(
+								$col2x - $col1x,
+								$tab2_hl,
+								'Bonus réparation QualiRépar',
+								$useborder,
+								'L',
+								true
+						);
+
+						$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+						$pdf->MultiCell(
+								$largcol2,
+								$tab2_hl,
+								'-'.price($montant_bonus, 0, $outputlangs),
+								$useborder,
+								'R',
+								true
+						);
+				}
+
+				
 				// Retained warranty
 				if ($object->displayRetainedWarranty()) {
 					$pdf->SetTextColor(40, 40, 40);
