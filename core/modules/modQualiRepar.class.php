@@ -10,7 +10,7 @@ class modQualiRepar extends DolibarrModules
 {
     public function __construct($db)
     {
-        global $langs;
+        global $langs, $conf;
 
         $this->db = $db;
 
@@ -42,7 +42,7 @@ class modQualiRepar extends DolibarrModules
                 'invoicecard'
             ),
             'models' => array(
-                'custom/qualirepar/core/modules/fichinter/doc/'
+                'custom/qualirepar/'
             )
         );
 
