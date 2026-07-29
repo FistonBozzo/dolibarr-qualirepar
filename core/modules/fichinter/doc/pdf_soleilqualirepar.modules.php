@@ -41,7 +41,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 /**
  *	Class to build interventions documents with model Soleil
  */
-class pdf_soleilqualirepar extends ModelePDFInterventions
+class pdf_soleilqualirepar extends ModelePDFFicheinter
 {
 	/**
 	 * @var DoliDB Database handler
