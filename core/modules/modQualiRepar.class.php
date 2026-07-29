@@ -40,6 +40,14 @@ class modQualiRepar extends DolibarrModules
             'hooks' => array(
                 'pdfgeneration',
                 'invoicecard'
+            ),
+            'models' => array(
+                'fichinter' => array(
+                    'soleilqualirepar'
+                ),
+                'facture' => array(
+                    'spongequalirepar'
+                )
             )
         );
 
