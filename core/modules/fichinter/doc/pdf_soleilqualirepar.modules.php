@@ -41,7 +41,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 /**
  *	Class to build interventions documents with model Soleil
  */
-class pdf_soleil extends ModelePDFFicheinter
+class pdf_soleilqualirepar extends ModelePDFInterventions
 {
 	/**
 	 * @var DoliDB Database handler
@@ -85,8 +85,8 @@ class pdf_soleil extends ModelePDFFicheinter
 		global $langs, $mysoc;
 
 		$this->db = $db;
-		$this->name = 'soleil';
-		$this->description = $langs->trans("DocumentModelStandardPDF");
+		$this->name = 'soleilqualirepar';
+		$this->description = $langs->trans("Bon intervention");
 		$this->update_main_doc_field = 1; // Save the name of generated file as the main doc when generating a doc with this template
 
 		// Page size for A4 format
