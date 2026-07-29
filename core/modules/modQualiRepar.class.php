@@ -22,7 +22,7 @@ class modQualiRepar extends DolibarrModules
 
         $this->name = 'QualiRepar';
         $this->description = 'Ajout du Bonus Réparation sur les factures';
-        $this->version = '0.1.0';
+        $this->version = '0.2.0';
 
         $this->const_name = 'MAIN_MODULE_QUALIREPAR';
 
@@ -113,6 +113,19 @@ class modQualiRepar extends DolibarrModules
             '',
             ''
         );
+
+        // Création du modèle PDF intervention QualiRépar
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model";
+        $sql .= " WHERE nom='soleil_qualirepar'";
+        $sql .= " AND type='ficheinter'";
+        $sql .= " AND entity=".(int) $conf->entity;
+
+        $resql = $this->db->query($sql);
+
+        if ($resql && $this->db->num_rows($resql) == 0) {
+            $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model";
+            $sql .= " (nom, entity, type, libelle)";
+            $sql .= " VALUES ('soleil_qualirepar', ".(int) $conf->entity.", 'ficheinter', 'Soleil QualiRépar')";
     
         return $this->_init(array(), $options);
     }
