@@ -58,7 +58,7 @@ class modQualiRepar extends DolibarrModules
                     'type' => 'price'
                 ),
                 array(
-                    'name' => 'afficher_bonus',
+                    'name' => 'afficher_bonus_reparation',
                     'label' => 'Afficher Bonus Réparation',
                     'type' => 'boolean'
                 )
@@ -98,7 +98,7 @@ class modQualiRepar extends DolibarrModules
     
         $extrafields->addExtraField(
             'afficher_bonus_reparation',
-            'Afficher bonus réparation',
+            'Afficher bonus',
             'boolean',
             101,
             '',
