@@ -47,11 +47,7 @@ class modQualiRepar extends DolibarrModules
                 'pdfgeneration',
                 'invoicecard'
             ),
-            'models' => array(
-                'ficheinter' => array(
-                    'custom/qualirepar/core/modules/fichinter/doc/'
-                )
-            )
+            'models' => 1
         );
 
         /*
