@@ -42,13 +42,13 @@ class modQualiRepar extends DolibarrModules
         /*
          * Hooks utilisés
          */
-       $this->module_parts = array(
+        $this->module_parts = array(
             'hooks' => array(
                 'pdfgeneration',
                 'invoicecard'
             ),
             'models' => array(
-                0 => 'custom/qualirepar/'
+                'custom/qualirepar/'
             )
         );
 
