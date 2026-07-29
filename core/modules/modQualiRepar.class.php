@@ -28,6 +28,12 @@ class modQualiRepar extends DolibarrModules
 
         $this->picto = 'bill';
 
+        $this->models = array(
+            'ficheinter' => array(
+                'soleil_qualirepar'
+            )
+        );
+
         $this->langfiles = array(
             'qualirepar@qualirepar'
         );
