@@ -113,23 +113,31 @@ class modQualiRepar extends DolibarrModules
             '',
             ''
         );
-
+    
+    
         // Création du modèle PDF intervention QualiRépar
         $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model";
         $sql .= " WHERE nom='soleil_qualirepar'";
         $sql .= " AND type='ficheinter'";
         $sql .= " AND entity=".(int) $conf->entity;
-
+    
         $resql = $this->db->query($sql);
-
+    
         if ($resql && $this->db->num_rows($resql) == 0) {
+    
             $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model";
             $sql .= " (nom, entity, type, libelle)";
-            $sql .= " VALUES ('soleil_qualirepar', ".(int) $conf->entity.", 'ficheinter', 'Soleil QualiRépar')";
+            $sql .= " VALUES ('soleil_qualirepar', "
+                 .(int) $conf->entity
+                 .", 'ficheinter', 'Soleil QualiRépar')";
+    
+            $this->db->query($sql);
+        }
+    
     
         return $this->_init(array(), $options);
     }
-    
+        
     
         /**
          * Désactivation du module
