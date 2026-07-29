@@ -48,7 +48,9 @@ class modQualiRepar extends DolibarrModules
                 'invoicecard'
             ),
             'models' => array(
-                'custom/qualirepar/'
+                'ficheinter' => array(
+                    'custom/qualirepar/core/modules/fichinter/doc/'
+                )
             )
         );
 
