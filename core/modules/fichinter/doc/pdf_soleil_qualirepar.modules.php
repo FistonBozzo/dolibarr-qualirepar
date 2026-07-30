@@ -468,25 +468,24 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 
 				// 1. On dessine le grand cadre rectangulaire de la description
-				// Fixation de la hauteur à 40mm pour raccourcir le cadre et créer l'espace blanc
+				// Augmentation de la hauteur à 65 pour coller au plus près du barème
 				if ($pagenb == 1) {
-					$this->_tableau($pdf, $tab_top, 40, 0, $outputlangs, 0, 1, $object);
-					$bottomlasttab = $tab_top + 40 + 1;
+					$this->_tableau($pdf, $tab_top, 65, 0, $outputlangs, 0, 1, $object);
+					$bottomlasttab = $tab_top + 65 + 1;
 				} else {
-					$this->_tableau($pdf, $tab_top_newpage, 40, 0, $outputlangs, 1, 1, $object);
-					$bottomlasttab = $tab_top_newpage + 40 + 1;
+					$this->_tableau($pdf, $tab_top_newpage, 65, 0, $outputlangs, 1, 1, $object);
+					$bottomlasttab = $tab_top_newpage + 65 + 1;
 				}
 
-				// AJOUT DE LA LIGNE DE SÉPARATION (Ferme le bas du petit cadre proprement)
-				$pdf->SetDrawColor(0, 0, 0);
-				$pdf->Line($this->marge_gauche, $bottomlasttab - 1, $this->page_largeur - $this->marge_droite, $bottomlasttab - 1);
+				// REMISSION DU TRAIT PARASITE : La ligne forcée a été supprimée. 
+				// C'est désormais le paramètre de la fonction _tableau qui ferme le cadre proprement.
 
 				// BAREME
-				// 2. On descend le barème de prix à 190mm pour un équilibre parfait au-dessus des signatures
+				// 2. On remonte le barème de prix à 175mm pour réduire l'espace blanc excessif
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
-				$pdf->SetY(190); 
+				$pdf->SetY(175); 
 				
 				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
@@ -540,7 +539,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->MultiCell(90, 25, '', 1);
 
 				// 4. Pied de page légal Dolibarr
-				$this->_pagefoot($pdf, $object, $outputlangs);
+				$this->_pagefoot($pdf, $object, $outputlangs
 				//FIN MODIF BAREME
 
 				
