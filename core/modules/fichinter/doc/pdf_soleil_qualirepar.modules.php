@@ -279,6 +279,26 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// Identification appareil
 				// ------------------------
 				
+				$boxX = $this->marge_gauche;
+				$boxY = $tab_top;
+				$boxW = 190;
+				$rowH = 6;
+				$colW = $boxW / 2;
+				
+				// Cadre
+				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 3);
+				
+				// Titre
+				$pdf->SetFont('', 'B', 10);
+				$pdf->SetXY($boxX, $boxY + 1);
+				$pdf->Cell($boxW, 4, "IDENTIFICATION DE L'APPAREIL", 0, 1, 'C');
+				
+				// Séparation sous le titre
+				$pdf->Line($boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH);
+				
+				// Séparation verticale
+				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 3);
+				
 				// Ligne 1
 				$pdf->SetXY($boxX + 2, $boxY + $rowH + 1);
 				$pdf->SetFont('', 'B', 8);
@@ -305,6 +325,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell($colW - 32, 4, price($object->array_options['options_budget_max']));
 
+				
 
 
 
