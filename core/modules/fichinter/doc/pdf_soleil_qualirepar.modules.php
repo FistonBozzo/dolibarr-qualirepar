@@ -466,7 +466,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 						}
 					}
 				}
-/*
+
 				// === Début du barème de prix (avec SQL, sans TVA) ===
 				$pdf->Ln(15); // saut de ligne pour éviter l'imbrication
 				$pdf->SetFont('Helvetica', 'B', 10);
@@ -478,11 +478,11 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->Cell(150, 5, 'Désignation', 1, 0, 'L');
 				$pdf->Cell(40, 5, 'Prix', 1, 1, 'R');
 				
-				// Requête SQL
+				// Requête SQL corrigée (Notez le S04 avec un zéro)
 				$sql = "SELECT p.label, p.price";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')";
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')"; 
 				$sql .= " ORDER BY p.label ASC";
 				
 				$resql = $this->db->query($sql);
@@ -492,13 +492,18 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				        $obj = $this->db->fetch_object($resql);
 				        if (empty($obj)) continue;
 				
-				        $pdf->Cell(150, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
-				        $pdf->Cell(40, 5, price($obj->price), 1, 1, 'R');
+				        // Correction : On utilise dol_htmlentitiesbr ou conversion directe sans escapetext()
+				        // Si problème d'accents, utilisez : pdf_get_page_content($obj->label)
+				        $label_propre = html_entity_decode($obj->label, ENT_QUOTES, 'UTF-8');
+				
+				        // Affichage des lignes
+				        $pdf->Cell(150, 5, $label_propre, 1, 0, 'L');
+				        $pdf->Cell(40, 5, price($obj->price, 0, $outputlangs, 1, -1, -1, $conf->currency), 1, 1, 'R');
 				    }
 				    $this->db->free($resql);
 				}
 				// === Fin du barème de prix (avec SQL, sans TVA) ===
-*/
+
 
 			
 
