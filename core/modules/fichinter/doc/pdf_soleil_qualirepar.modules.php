@@ -468,7 +468,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 
 				
-				// 1. On dessine d'abord le grand cadre rectangulaire de la description
+				// 1. On dessine le grand cadre rectangulaire de la description
 				if ($pagenb == 1) {
 					$this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 1, $object);
 					$bottomlasttab = $this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
@@ -477,12 +477,16 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					$bottomlasttab = $this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
 				}
 
-				//BAREME
-				// 2. On affiche le barème de prix calé à 180mm (juste au-dessus des signatures)
+				// AJOUT DE LA LIGNE DE SÉPARATION (Ferme le cadre du haut proprement)
+				$pdf->SetDrawColor(0, 0, 0);
+				$pdf->Line($this->marge_gauche, $bottomlasttab - 1, $this->page_largeur - $this->marge_droite, $bottomlasttab - 1);
+
+				// BAREME
+				// 2. On descend le barème de prix à 185mm (ajustement parfait au centre de l'espace blanc)
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
-				$pdf->SetY(180); 
+				$pdf->SetY(185); 
 				
 				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
@@ -513,14 +517,14 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    }
 				    $this->db->free($resql);
 				}
-				//FIN BAREME
+				// FIN BAREME
 
-				// 3. On force l'affichage des deux blocs de signature (nom + cadres) tout en bas à 230mm
+				// 3. Zone de signature inchangée tout en bas à 230mm
 				$employee_name = '';
 				if (!empty($object)) {
 					$arrayidcontact = $object->getIdContact('internal', 'INTERVENING');
 					if (count($arrayidcontact) > 0) {
-						$object->fetch_user($arrayidcontact[0]);
+						$object->fetch_user($arrayidcontact);
 						$employee_name = $object->user->getFullName($outputlangs);
 					}
 				}
@@ -535,10 +539,8 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->SetXY(110, 235);
 				$pdf->MultiCell(90, 25, '', 1);
 
-				// 4. On génère le pied de page légal de Dolibarr
+				// 4. Pied de page légal Dolibarr
 				$this->_pagefoot($pdf, $object, $outputlangs);
-
-				
 				//FIN MODIF BAREME
 
 				
