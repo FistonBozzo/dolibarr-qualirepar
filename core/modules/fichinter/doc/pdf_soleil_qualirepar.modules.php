@@ -479,10 +479,23 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 
 				//BAREME
-				// 1. Préparation des colonnes pour le barème de prix
+				// 1. Préparation des dimensions fixes alignées sur les tableaux du haut
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
+				// Calage fixe à 182mm pour passer au-dessus des signatures (qui sont à 230mm)
+				$pdf->SetY(182); 
+				
+				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
+				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
+				
+				$pdf->SetFont('Helvetica', '', $default_font_size);
+				
+				// En-têtes du barème
+				$pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
+				$pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
+				
+				// Requête SQL de vos services
 				$sql = "SELECT p.label, p.price";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; 
@@ -492,22 +505,6 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$resql = $this->db->query($sql);
 				if ($resql) {
 				    $num = $this->db->num_rows($resql);
-				    
-				    // --- CALCUL DYNAMIQUE ---
-				    $hauteur_lignes = ($num + 2) * 5; // Nombre de lignes + en-tête + titre
-				    
-				    // On place le barème à une hauteur fixe de sécurité par rapport au bas de la page
-				    // Plus il y a de lignes, plus le haut du tableau va monter (grandit vers le haut)
-				    $pdf->SetY(-45 - $hauteur_lignes); 
-				    
-				    // --- AFFICHAGE DU BARÈME ---
-				    $pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
-				    $pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
-				    
-				    $pdf->SetFont('Helvetica', '', $default_font_size);
-				    $pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
-				    $pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
-				    
 				    for ($i = 0; $i < $num; $i++) {
 				        $obj = $this->db->fetch_object($resql);
 				        if (empty($obj)) continue;
@@ -521,9 +518,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    $this->db->free($resql);
 				}
 
-				// 2. FORCE L'AFFICHAGE DES SIGNATURES TOUT EN BAS
-				// On force le curseur Y à descendre à 35mm du bas absolu avant de dessiner les signatures
-				$pdf->SetY(-35);
+				// 2. Déclenchement unique de la fin de page
 				$this->_pagefoot($pdf, $object, $outputlangs);
 				//FIN BAREME
 
