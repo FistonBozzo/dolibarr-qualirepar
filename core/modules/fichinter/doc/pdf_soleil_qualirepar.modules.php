@@ -468,34 +468,30 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 
 				
-				// Show square
+				// 1. On dessine d'abord le grand cadre rectangulaire de la description
 				if ($pagenb == 1) {
-					$this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 0, $object);
+					$this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 1, $object);
 					$bottomlasttab = $this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
 				} else {
-					$this->_tableau($pdf, $tab_top_newpage, $this->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 1, 0, $object);
+					$this->_tableau($pdf, $tab_top_newpage, $this->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 1, 1, $object);
 					$bottomlasttab = $this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
 				}
 
-
 				//BAREME
-				// 1. Préparation des dimensions fixes alignées sur les tableaux du haut
+				// 2. On affiche le barème de prix calé à 180mm (juste au-dessus des signatures)
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
-				// Calage fixe à 182mm pour passer au-dessus des signatures (qui sont à 230mm)
-				$pdf->SetY(182); 
+				$pdf->SetY(180); 
 				
 				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
 				
 				$pdf->SetFont('Helvetica', '', $default_font_size);
 				
-				// En-têtes du barème
 				$pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
 				$pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
 				
-				// Requête SQL de vos services
 				$sql = "SELECT p.label, p.price";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; 
@@ -517,10 +513,33 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    }
 				    $this->db->free($resql);
 				}
-
-				// 2. Déclenchement unique de la fin de page
-				$this->_pagefoot($pdf, $object, $outputlangs);
 				//FIN BAREME
+
+				// 3. On force l'affichage des deux blocs de signature (nom + cadres) tout en bas à 230mm
+				$employee_name = '';
+				if (!empty($object)) {
+					$arrayidcontact = $object->getIdContact('internal', 'INTERVENING');
+					if (count($arrayidcontact) > 0) {
+						$object->fetch_user($arrayidcontact[0]);
+						$employee_name = $object->user->getFullName($outputlangs);
+					}
+				}
+
+				$pdf->SetXY(10, 230);
+				$pdf->MultiCell(90, 5, $outputlangs->transnoentities("NameAndSignatureOfInternalContact"), 0, 'L', false);
+				$pdf->SetXY(10, 235);
+				$pdf->MultiCell(90, 25, $employee_name, 1, 'L');
+
+				$pdf->SetXY(110, 230);
+				$pdf->MultiCell(90, 5, $outputlangs->transnoentities("NameAndSignatureOfExternalContact"), 0, 'L', false);
+				$pdf->SetXY(110, 235);
+				$pdf->MultiCell(90, 25, '', 1);
+
+				// 4. On génère le pied de page légal de Dolibarr
+				$this->_pagefoot($pdf, $object, $outputlangs);
+
+				
+				//FIN MODIF BAREME
 
 				
 				$this->_pagefoot($pdf, $object, $outputlangs);
