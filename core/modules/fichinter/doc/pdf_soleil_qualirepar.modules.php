@@ -467,8 +467,9 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					}
 				}
 
+
+				// Debut modif bareme
 				// 1. On dessine le grand cadre rectangulaire de la description
-				// Augmentation de la hauteur à 65 pour coller au plus près du barème
 				if ($pagenb == 1) {
 					$this->_tableau($pdf, $tab_top, 65, 0, $outputlangs, 0, 1, $object);
 					$bottomlasttab = $tab_top + 65 + 1;
@@ -477,9 +478,6 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					$bottomlasttab = $tab_top_newpage + 65 + 1;
 				}
 
-				// REMISSION DU TRAIT PARASITE : La ligne forcée a été supprimée. 
-				// C'est désormais le paramètre de la fonction _tableau qui ferme le cadre proprement.
-
 				// BAREME
 				// 2. On remonte le barème de prix à 175mm pour réduire l'espace blanc excessif
 				$col1_width = 140; 
@@ -487,10 +485,10 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				
 				$pdf->SetY(175); 
 				
-				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
+				$pdf->SetFont('Helvetica', 'B', 11);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
 				
-				$pdf->SetFont('Helvetica', '', $default_font_size);
+				$pdf->SetFont('Helvetica', '', 10);
 				
 				$pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
 				$pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
@@ -519,19 +517,10 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// FIN BAREME
 
 				// 3. Zone de signature inchangée tout en bas à 230mm
-				$employee_name = '';
-				if (!empty($object)) {
-					$arrayidcontact = $object->getIdContact('internal', 'INTERVENING');
-					if (count($arrayidcontact) > 0) {
-						$object->fetch_user($arrayidcontact);
-						$employee_name = $object->user->getFullName($outputlangs);
-					}
-				}
-
 				$pdf->SetXY(10, 230);
 				$pdf->MultiCell(90, 5, $outputlangs->transnoentities("NameAndSignatureOfInternalContact"), 0, 'L', false);
 				$pdf->SetXY(10, 235);
-				$pdf->MultiCell(90, 25, $employee_name, 1, 'L');
+				$pdf->MultiCell(90, 25, '', 1, 'L');
 
 				$pdf->SetXY(110, 230);
 				$pdf->MultiCell(90, 5, $outputlangs->transnoentities("NameAndSignatureOfExternalContact"), 0, 'L', false);
@@ -539,7 +528,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->MultiCell(90, 25, '', 1);
 
 				// 4. Pied de page légal Dolibarr
-				$this->_pagefoot($pdf, $object, $outputlangs
+				$this->_pagefoot($pdf, $object, $outputlangs);
 				//FIN MODIF BAREME
 
 				
