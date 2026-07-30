@@ -470,21 +470,21 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 				// Debut modif bareme
 				// 1. On dessine le grand cadre rectangulaire de la description
-				// Réduction de la hauteur à 35mm pour couper le cadre bien avant le barème
+				// Augmentation de 35mm à 50mm pour un juste milieu parfait
 				if ($pagenb == 1) {
-					$this->_tableau($pdf, $tab_top, 35, 0, $outputlangs, 0, 1, $object);
-					$bottomlasttab = $tab_top + 35 + 1;
+					$this->_tableau($pdf, $tab_top, 50, 0, $outputlangs, 0, 1, $object);
+					$bottomlasttab = $tab_top + 50 + 1;
 				} else {
-					$this->_tableau($pdf, $tab_top_newpage, 35, 0, $outputlangs, 1, 1, $object);
-					$bottomlasttab = $tab_top_newpage + 35 + 1;
+					$this->_tableau($pdf, $tab_top_newpage, 50, 0, $outputlangs, 1, 1, $object);
+					$bottomlasttab = $tab_top_newpage + 50 + 1;
 				}
 
 				// BAREME
-				// 2. Positionnement fixe et sécurisé à 185mm pour un rendu aéré et centré
+				// 2. On remonte légèrement à 180mm pour resserrer l'espace blanc central
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
-				$pdf->SetY(185); 
+				$pdf->SetY(180); 
 				
 				$pdf->SetFont('Helvetica', 'B', 11);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
