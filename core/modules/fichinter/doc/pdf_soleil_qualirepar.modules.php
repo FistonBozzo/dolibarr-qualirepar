@@ -469,7 +469,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 
 
-
+/*
 				// === Début du barème de prix ===
 				$pdf->SetFont('Helvetica', 'B', 10);
 				$pdf->Ln(10);
@@ -510,7 +510,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    dol_syslog("Erreur SQL dans pdf_soleil_qualirepar: " . $this->db->error(), LOG_ERR);
 				}
 				// === Fin du barème de prix ===
-				
+				*/
 
 				
 				// Show square
