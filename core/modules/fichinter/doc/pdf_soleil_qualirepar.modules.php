@@ -273,7 +273,69 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$nexY = $tab_top + 7;
 
 				$pdf->SetXY($this->marge_gauche, $tab_top);
-				$pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', false);
+				$pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', false// ------------------------
+		
+								
+				// Identification appareil
+				// ------------------------
+				
+				$pdf->SetFont('', 'B', 10);
+				
+				$boxX = $this->marge_gauche;
+				$boxY = $tab_top;
+				$boxW = 190;
+				$rowH = 6;
+				$colW = $boxW / 2;
+				
+				// Cadre
+				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 5);
+				
+				// Titre
+				$pdf->SetXY($boxX, $boxY + 1);
+				$pdf->Cell($boxW, 4, "IDENTIFICATION DE L'APPAREIL", 0, 1, 'C');
+				
+				// Séparations
+				$pdf->Line($boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH);
+				$pdf->Line($boxX, $boxY + $rowH * 3, $boxX + $boxW, $boxY + $rowH * 3);
+				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 5);
+				
+				// Libellés
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY($boxX + 2, $boxY + $rowH + 1);
+				$pdf->Cell($colW - 4, 4, "Marque");
+				
+				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH + 1);
+				$pdf->Cell($colW - 4, 4, "Modèle");
+				
+				$pdf->SetXY($boxX + 2, $boxY + $rowH * 3 + 1);
+				$pdf->Cell($colW - 4, 4, "N° de série");
+				
+				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 3 + 1);
+				$pdf->Cell($colW - 4, 4, "Budget maximum");
+				
+				// Valeurs
+				$pdf->SetFont('', '', 9);
+				
+				$pdf->SetXY($boxX + 2, $boxY + $rowH * 2);
+				$pdf->Cell($colW - 4, 4, $object->array_options['options_marque']);
+				
+				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 2);
+				$pdf->Cell($colW - 4, 4, $object->array_options['options_modele']);
+				
+				$pdf->SetXY($boxX + 2, $boxY + $rowH * 4);
+				$pdf->Cell($colW - 4, 4, $object->array_options['options_serial']);
+				
+				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 4);
+				$pdf->Cell($colW - 4, 4, price($object->array_options['options_budget_max'])););
+
+				$tab_top += 32;
+
+
+
+
+
+				
 				$pdf->line($this->marge_gauche, $tab_top + 5, $this->page_largeur - $this->marge_droite, $tab_top + 5);
 
 				$pdf->SetFont('', '', $default_font_size - 1);
