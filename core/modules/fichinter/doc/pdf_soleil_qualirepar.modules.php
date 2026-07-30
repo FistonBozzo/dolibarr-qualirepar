@@ -279,58 +279,31 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// Identification appareil
 				// ------------------------
 				
-				$pdf->SetFont('', 'B', 10);
-				
-				$boxX = $this->marge_gauche;
-				$boxY = $tab_top;
-				$boxW = 190;
-				$rowH = 6;
-				$colW = $boxW / 2;
-				
-				// Cadre
-				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 5);
-				
-				// Titre
-				$pdf->SetXY($boxX, $boxY + 1);
-				$pdf->Cell($boxW, 4, "IDENTIFICATION DE L'APPAREIL", 0, 1, 'C');
-				
-				// Séparations
-				$pdf->Line($boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH);
-				$pdf->Line($boxX, $boxY + $rowH * 3, $boxX + $boxW, $boxY + $rowH * 3);
-				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 5);
-				
-				// Libellés
-				$pdf->SetFont('', 'B', 8);
-				
+				// Ligne 1
 				$pdf->SetXY($boxX + 2, $boxY + $rowH + 1);
-				$pdf->Cell($colW - 4, 4, "Marque");
+				$pdf->SetFont('', 'B', 8);
+				$pdf->Cell(18, 4, "Marque :");
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - 22, 4, $object->array_options['options_marque']);
 				
 				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH + 1);
-				$pdf->Cell($colW - 4, 4, "Modèle");
+				$pdf->SetFont('', 'B', 8);
+				$pdf->Cell(18, 4, "Modèle :");
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - 22, 4, $object->array_options['options_modele']);
 				
+				// Ligne 2
 				$pdf->SetXY($boxX + 2, $boxY + $rowH * 3 + 1);
-				$pdf->Cell($colW - 4, 4, "N° de série");
+				$pdf->SetFont('', 'B', 8);
+				$pdf->Cell(22, 4, "N° série :");
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - 26, 4, $object->array_options['options_serial']);
 				
 				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 3 + 1);
-				$pdf->Cell($colW - 4, 4, "Budget maximum");
-				
-				// Valeurs
-				$pdf->SetFont('', '', 9);
-				
-				$pdf->SetXY($boxX + 2, $boxY + $rowH * 2);
-				$pdf->Cell($colW - 4, 4, $object->array_options['options_marque']);
-				
-				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 2);
-				$pdf->Cell($colW - 4, 4, $object->array_options['options_modele']);
-				
-				$pdf->SetXY($boxX + 2, $boxY + $rowH * 4);
-				$pdf->Cell($colW - 4, 4, $object->array_options['options_serial']);
-				
-				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 4);
-				$pdf->Cell($colW - 4, 4, price($object->array_options['options_budget_max']));
-
-				$tab_top += 32;
-
+				$pdf->SetFont('', 'B', 8);
+				$pdf->Cell(28, 4, "Budget max :");
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - 32, 4, price($object->array_options['options_budget_max']));
 
 
 
