@@ -467,48 +467,34 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					}
 				}
 
-
-
-				// === Début du barème de prix ===
+				// === Début du barème de prix (version safe) ===
+				$pdf->Ln(10);
 				$pdf->SetFont('Helvetica', 'B', 10);
-				$pdf->Ln(5);
-				$pdf->MultiCell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
+				$pdf->Cell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
 				
 				$pdf->SetFont('Helvetica', '', 9);
-				$posX = $this->marge_gauche;
-				$posY = $pdf->GetY();
 				
-				// En-têtes du tableau
-				$pdf->SetXY($posX, $posY);
-				$pdf->MultiCell(120, 5, 'Désignation', 1, 0, 'L');
-				$pdf->MultiCell(30, 5, 'Prix HT', 1, 0, 'R');
-				$pdf->MultiCell(30, 5, 'Prix TTC', 1, 1, 'R');
+				// En-têtes
+				$pdf->Cell(120, 5, 'Désignation', 1, 0, 'L');
+				$pdf->Cell(30, 5, 'Prix HT', 1, 0, 'R');
+				$pdf->Cell(30, 5, 'Prix TTC', 1, 1, 'R');
 				
-				$posY += 5;
+				// Lignes fixes (test)
+				$pdf->Cell(120, 5, 'Déplacement', 1, 0, 'L');
+				$pdf->Cell(30, 5, '50,00', 1, 0, 'R');
+				$pdf->Cell(30, 5, '60,00', 1, 1, 'R');
 				
-				// Liste de services (par référence)
-				$sql = "SELECT p.label, p.price, p.price_ttc";
-				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
-				$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')";
-				$sql .= " ORDER BY p.label ASC";
+				$pdf->Cell(120, 5, 'Main d\'œuvre 1h', 1, 0, 'L');
+				$pdf->Cell(30, 5, '40,00', 1, 0, 'R');
+				$pdf->Cell(30, 5, '48,00', 1, 1, 'R');
 				
-				$resql = $this->db->query($sql);
-				if ($resql) {
-				    $num = $this->db->num_rows($resql);
-				    for ($i = 0; $i < $num; $i++) {
-				        $obj = $this->db->fetch_object($resql);
-				        if (empty($obj)) continue;
-				
-				        $pdf->SetXY($posX, $posY);
-				        $pdf->MultiCell(120, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
-				        $pdf->MultiCell(30, 5, price($obj->price), 1, 0, 'R');
-				        $pdf->MultiCell(30, 5, price($obj->price_ttc), 1, 1, 'R');
-				        $posY += 5;
-				    }
-				    $this->db->free($resql);
-				}
-				// === Fin du barème de prix ===
+				$pdf->Cell(120, 5, 'Diagnostic', 1, 0, 'L');
+				$pdf->Cell(30, 5, '30,00', 1, 0, 'R');
+				$pdf->Cell(30, 5, '36,00', 1, 1, 'R');
+				// === Fin du barème de prix (version safe) ===
+
+
+			
 
 				
 				// Show square
