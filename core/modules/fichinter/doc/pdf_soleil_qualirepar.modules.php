@@ -332,7 +332,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$tab_top += 25;
 
 
-				$pdf->SetFont('', '', $default_font_size - 1);
+				$pdf->SetFont('', '', $default_font_size - 0.5);
 				$pdf->SetXY($this->marge_gauche, $tab_top + 1);
 				$pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', false);
 				
