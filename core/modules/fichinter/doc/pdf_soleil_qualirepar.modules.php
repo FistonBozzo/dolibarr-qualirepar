@@ -466,7 +466,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 						}
 					}
 				}
-
+/*
 				// === Début du barème de prix (avec SQL, sans TVA) ===
 				$pdf->Ln(15); // saut de ligne pour éviter l'imbrication
 				$pdf->SetFont('Helvetica', 'B', 10);
@@ -498,7 +498,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    $this->db->free($resql);
 				}
 				// === Fin du barème de prix (avec SQL, sans TVA) ===
-
+*/
 
 			
 
