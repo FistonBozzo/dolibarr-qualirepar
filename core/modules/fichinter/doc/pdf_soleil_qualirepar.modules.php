@@ -478,31 +478,51 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 
 
-				// --- DÉBUT DU BLOC BARÈME DE PRIX EN BAS DE PAGE ---
-				$container_width = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
-				$col1_width = round($container_width * 0.79); 
-				$col2_width = $container_width - $col1_width;  
+				//BAREME
+				// 1. On dessine d'abord la zone de signature tout en bas de la page
+				$this->_pagefoot($pdf, $object, $outputlangs);
 
-				// On force la position verticale en bas de page pour le détacher
-				$pdf->SetY(-65); 
-				
-				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
-				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
-				
-				$pdf->SetFont('Helvetica', '', $default_font_size);
-				
-				$pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
-				$pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
+				// 2. Préparation des colonnes et de la requête pour le calcul dynamique
+				$col1_width = 140; 
+				$col2_width = 50;  
 				
 				$sql = "SELECT p.label, p.price";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; 
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')";
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')"; 
 				$sql .= " ORDER BY p.label ASC";
 				
 				$resql = $this->db->query($sql);
 				if ($resql) {
 				    $num = $this->db->num_rows($resql);
+				    
+				    // --- CALCUL DYNAMIQUE DE LA POSITION ---
+				    $hauteur_titre = 5;       // Espace pour le titre 'Barème de prix'
+				    $hauteur_entete = 5;      // Espace pour la ligne 'Désignation / Prix'
+				    $hauteur_par_ligne = 5;   // Espace pour chaque forfait trouvé en base
+				    $marge_securite = 8;      // Zone blanche de respiration au-dessus des signatures
+				    
+				    // Calcul de la taille totale que va prendre le tableau
+				    $hauteur_totale_tableau = $hauteur_titre + $hauteur_entete + ($num * $hauteur_par_ligne) + $marge_securite;
+				    
+				    // La zone signature de Dolibarr commence à -40mm du bas de la feuille.
+				    // On remonte le curseur de la hauteur exacte requise par le tableau.
+				    $position_y_dynamique = -40 - $hauteur_totale_tableau;
+				    
+				    // Application de la coordonnée verticale calculée
+				    $pdf->SetY($position_y_dynamique); 
+				    
+				    // --- AFFICHAGE DU TABLEAU ---
+				    $pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
+				    $pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
+				    
+				    $pdf->SetFont('Helvetica', '', $default_font_size);
+				    
+				    // En-têtes du barème alignés sur la boîte principale
+				    $pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
+				    $pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
+				    
+				    // Injection des lignes de produits
 				    for ($i = 0; $i < $num; $i++) {
 				        $obj = $this->db->fetch_object($resql);
 				        if (empty($obj)) continue;
@@ -515,7 +535,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    }
 				    $this->db->free($resql);
 				}
-				// --- FIN DU BLOC BARÈME DE PRIX ---
+				//FIN BAREME
 
 				
 				$this->_pagefoot($pdf, $object, $outputlangs);
