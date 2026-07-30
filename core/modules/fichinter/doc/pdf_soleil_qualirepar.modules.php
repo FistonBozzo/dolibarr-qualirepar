@@ -467,31 +467,37 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					}
 				}
 
-				// === Début du barème de prix (version safe) ===
-				$pdf->Ln(10);
+				// === Début du barème de prix (avec SQL, sans TVA) ===
+				$pdf->Ln(15); // saut de ligne pour éviter l'imbrication
 				$pdf->SetFont('Helvetica', 'B', 10);
-				$pdf->Cell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
+				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
 				
 				$pdf->SetFont('Helvetica', '', 9);
 				
 				// En-têtes
-				$pdf->Cell(120, 5, 'Désignation', 1, 0, 'L');
-				$pdf->Cell(30, 5, 'Prix HT', 1, 0, 'R');
-				$pdf->Cell(30, 5, 'Prix TTC', 1, 1, 'R');
+				$pdf->Cell(150, 5, 'Désignation', 1, 0, 'L');
+				$pdf->Cell(40, 5, 'Prix', 1, 1, 'R');
 				
-				// Lignes fixes (test)
-				$pdf->Cell(120, 5, 'Déplacement', 1, 0, 'L');
-				$pdf->Cell(30, 5, '50,00', 1, 0, 'R');
-				$pdf->Cell(30, 5, '60,00', 1, 1, 'R');
+				// Requête SQL
+				$sql = "SELECT p.label, p.price";
+				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
+				$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')";
+				$sql .= " ORDER BY p.label ASC";
 				
-				$pdf->Cell(120, 5, 'Main d\'œuvre 1h', 1, 0, 'L');
-				$pdf->Cell(30, 5, '40,00', 1, 0, 'R');
-				$pdf->Cell(30, 5, '48,00', 1, 1, 'R');
+				$resql = $this->db->query($sql);
+				if ($resql) {
+				    $num = $this->db->num_rows($resql);
+				    for ($i = 0; $i < $num; $i++) {
+				        $obj = $this->db->fetch_object($resql);
+				        if (empty($obj)) continue;
 				
-				$pdf->Cell(120, 5, 'Diagnostic', 1, 0, 'L');
-				$pdf->Cell(30, 5, '30,00', 1, 0, 'R');
-				$pdf->Cell(30, 5, '36,00', 1, 1, 'R');
-				// === Fin du barème de prix (version safe) ===
+				        $pdf->Cell(150, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
+				        $pdf->Cell(40, 5, price($obj->price), 1, 1, 'R');
+				    }
+				    $this->db->free($resql);
+				}
+				// === Fin du barème de prix (avec SQL, sans TVA) ===
 
 
 			
