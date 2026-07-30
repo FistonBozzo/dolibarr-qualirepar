@@ -288,13 +288,11 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// Cadre
 				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 3);
 				
-				// Titre
-				$pdf->SetFont('', 'B', 10);
-				$pdf->SetXY($boxX, $boxY + 1);
-				$pdf->Cell($boxW, 4, "IDENTIFICATION DE L'APPAREIL", 0, 1, 'C');
-				
-				// Séparation sous le titre
+				// Trait sous le titre
 				$pdf->Line($boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH);
+				
+				// Trait entre les deux lignes
+				$pdf->Line($boxX, $boxY + $rowH * 2, $boxX + $boxW, $boxY + $rowH * 2);
 				
 				// Séparation verticale
 				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 3);
