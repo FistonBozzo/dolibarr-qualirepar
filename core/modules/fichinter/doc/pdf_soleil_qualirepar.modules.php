@@ -327,7 +327,8 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->Cell($labelW, 4, "Budget max :");
 				
 				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - $labelW - 5, 4, price($object->array_options['options_budget_max']));
+				$budget_clean = (float) $object->array_options['options_budget_max'];
+$pdf->			Cell($colW - $labelW - 5, 4, price($budget_clean, 0, $outputlangs, 1, -1, -1, $conf->currency));
 
 				$tab_top += 25;
 
