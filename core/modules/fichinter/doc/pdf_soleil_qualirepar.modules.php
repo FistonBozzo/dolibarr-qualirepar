@@ -498,7 +498,7 @@ $pdf->			Cell($colW - $labelW - 5, 4, price($budget_clean, 0, $outputlangs, 1, -
 				$sql = "SELECT p.label, p.price";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; 
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')"; 
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04','S05')"; 
 				$sql .= " ORDER BY p.label ASC";
 				
 				$resql = $this->db->query($sql);
