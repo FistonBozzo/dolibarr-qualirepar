@@ -522,13 +522,6 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 				// === Fin du barème de prix ===
 				
-				// Show square
-				if ($pagenb == 1) {
-				    // ...
-
-
-
-
 
 				
 				// Show square
