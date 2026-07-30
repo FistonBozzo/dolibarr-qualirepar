@@ -327,7 +327,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->Cell($colW - 4, 4, $object->array_options['options_serial']);
 				
 				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 4);
-				$pdf->Cell($colW - 4, 4, price($object->array_options['options_budget_max'])););
+				$pdf->Cell($colW - 4, 4, price($object->array_options['options_budget_max']));
 
 				$tab_top += 32;
 
