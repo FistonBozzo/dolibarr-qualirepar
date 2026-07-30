@@ -470,20 +470,21 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 				// Debut modif bareme
 				// 1. On dessine le grand cadre rectangulaire de la description
+				// Réduction de la hauteur à 35mm pour couper le cadre bien avant le barème
 				if ($pagenb == 1) {
-					$this->_tableau($pdf, $tab_top, 65, 0, $outputlangs, 0, 1, $object);
-					$bottomlasttab = $tab_top + 65 + 1;
+					$this->_tableau($pdf, $tab_top, 35, 0, $outputlangs, 0, 1, $object);
+					$bottomlasttab = $tab_top + 35 + 1;
 				} else {
-					$this->_tableau($pdf, $tab_top_newpage, 65, 0, $outputlangs, 1, 1, $object);
-					$bottomlasttab = $tab_top_newpage + 65 + 1;
+					$this->_tableau($pdf, $tab_top_newpage, 35, 0, $outputlangs, 1, 1, $object);
+					$bottomlasttab = $tab_top_newpage + 35 + 1;
 				}
 
 				// BAREME
-				// 2. On remonte le barème de prix à 175mm pour réduire l'espace blanc excessif
+				// 2. Positionnement fixe et sécurisé à 185mm pour un rendu aéré et centré
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
-				$pdf->SetY(175); 
+				$pdf->SetY(185); 
 				
 				$pdf->SetFont('Helvetica', 'B', 11);
 				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
@@ -516,7 +517,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				}
 				// FIN BAREME
 
-				// 3. Zone de signature inchangée tout en bas à 230mm
+				// 3. Zone de signature stable tout en bas à 230mm
 				$pdf->SetXY(10, 230);
 				$pdf->MultiCell(90, 5, $outputlangs->transnoentities("NameAndSignatureOfInternalContact"), 0, 'L', false);
 				$pdf->SetXY(10, 235);
