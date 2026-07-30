@@ -469,15 +469,14 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 
 
-/*
 				// === Début du barème de prix ===
 				$pdf->SetFont('Helvetica', 'B', 10);
-				$pdf->Ln(10);
+				$pdf->Ln(5);
 				$pdf->MultiCell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
 				
 				$pdf->SetFont('Helvetica', '', 9);
-				$posY = $pdf->GetY();
 				$posX = $this->marge_gauche;
+				$posY = $pdf->GetY();
 				
 				// En-têtes du tableau
 				$pdf->SetXY($posX, $posY);
@@ -485,13 +484,13 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->MultiCell(30, 5, 'Prix HT', 1, 0, 'R');
 				$pdf->MultiCell(30, 5, 'Prix TTC', 1, 1, 'R');
 				
-				$posY += 5; // avancer après l'en-tête
+				$posY += 5;
 				
-				// Liste précise de services (par référence)
-				$sql = "SELECT p.label, p.price, p.price_ttc, p.tva_tx, p.ref";
+				// Liste de services (par référence)
+				$sql = "SELECT p.label, p.price, p.price_ttc";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
 				$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')"; // À adapter
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')";
 				$sql .= " ORDER BY p.label ASC";
 				
 				$resql = $this->db->query($sql);
@@ -499,6 +498,8 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    $num = $this->db->num_rows($resql);
 				    for ($i = 0; $i < $num; $i++) {
 				        $obj = $this->db->fetch_object($resql);
+				        if (empty($obj)) continue;
+				
 				        $pdf->SetXY($posX, $posY);
 				        $pdf->MultiCell(120, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
 				        $pdf->MultiCell(30, 5, price($obj->price), 1, 0, 'R');
@@ -506,11 +507,8 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				        $posY += 5;
 				    }
 				    $this->db->free($resql);
-				} else {
-				    dol_syslog("Erreur SQL dans pdf_soleil_qualirepar: " . $this->db->error(), LOG_ERR);
 				}
 				// === Fin du barème de prix ===
-				*/
 
 				
 				// Show square
