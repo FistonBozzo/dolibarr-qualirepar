@@ -297,31 +297,39 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// Séparation verticale
 				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 3);
 				
-				// Ligne 1
-				$pdf->SetXY($boxX + 2, $boxY + $rowH + 1);
-				$pdf->SetFont('', 'B', 8);
-				$pdf->Cell(18, 4, "Marque :");
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - 22, 4, $object->array_options['options_marque']);
+				// Largeur réservée au libellé
+				$labelW = 35;
 				
-				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH + 1);
+				// Ligne 1
 				$pdf->SetFont('', 'B', 8);
-				$pdf->Cell(18, 4, "Modèle :");
+				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, "Marque :");
+				
 				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - 22, 4, $object->array_options['options_modele']);
+				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_marque']);
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, "Modèle :");
+				
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_modele']);
+				
 				
 				// Ligne 2
-				$pdf->SetXY($boxX + 2, $boxY + $rowH * 2 + 1);
 				$pdf->SetFont('', 'B', 8);
-				$pdf->Cell(22, 4, "N° série :");
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - 26, 4, $object->array_options['options_serial']);
+				$pdf->SetXY($boxX + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, "N° série :");
 				
-				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 2 + 1);
-				$pdf->SetFont('', 'B', 8);
-				$pdf->Cell(28, 4, "Budget max :");
 				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - 32, 4, price($object->array_options['options_budget_max']));
+				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_serial']);
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, "Budget max :");
+				
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell($colW - $labelW - 5, 4, price($object->array_options['options_budget_max']));
 
 				$tab_top += 32;
 
