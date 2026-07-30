@@ -272,9 +272,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
 
-				$pdf->SetXY($this->marge_gauche, $tab_top);
-				$pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', false);
-								
+							
 				// ------------------------
 				// Identification appareil
 				// ------------------------
@@ -334,6 +332,9 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$tab_top += 32;
 
 
+				
+				$pdf->SetXY($this->marge_gauche, $tab_top);
+				$pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', false);
 				
 				$pdf->line($this->marge_gauche, $tab_top + 5, $this->page_largeur - $this->marge_droite, $tab_top + 5);
 
