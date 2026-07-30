@@ -205,7 +205,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					$pdf->setPrintHeader(false);
 					$pdf->setPrintFooter(false);
 				}
-				$pdf->SetFont(pdf_getPDFFont($outputlangs));
+				$pdf->SetFont('Helvetica', '', $default_font_size);
 				// Set path to the background PDF File
 				if (getDolGlobalString('MAIN_ADD_PDF_BACKGROUND')) {
 					$pagecount = $pdf->setSourceFile($conf->mycompany->dir_output.'/' . getDolGlobalString('MAIN_ADD_PDF_BACKGROUND'));
@@ -477,6 +477,47 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					$bottomlasttab = $this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
 				}
 
+
+				// --- DÉBUT DU BLOC BARÈME DE PRIX EN BAS DE PAGE ---
+				$container_width = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
+				$col1_width = round($container_width * 0.79); 
+				$col2_width = $container_width - $col1_width;  
+
+				// On force la position verticale en bas de page pour le détacher
+				$pdf->SetY(-65); 
+				
+				$pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
+				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
+				
+				$pdf->SetFont('Helvetica', '', $default_font_size);
+				
+				$pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
+				$pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
+				
+				$sql = "SELECT p.label, p.price";
+				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
+				$sql .= " WHERE p.fk_product_type = 1"; 
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')";
+				$sql .= " ORDER BY p.label ASC";
+				
+				$resql = $this->db->query($sql);
+				if ($resql) {
+				    $num = $this->db->num_rows($resql);
+				    for ($i = 0; $i < $num; $i++) {
+				        $obj = $this->db->fetch_object($resql);
+				        if (empty($obj)) continue;
+				
+				        $label_propre = html_entity_decode($obj->label, ENT_QUOTES, 'UTF-8');
+				        $price_formatted = price($obj->price, 0, $outputlangs, 1, -1, -1, $conf->currency);
+
+				        $pdf->Cell($col1_width, 5, $label_propre, 1, 0, 'L');
+				        $pdf->Cell($col2_width, 5, $price_formatted, 1, 1, 'R');
+				    }
+				    $this->db->free($resql);
+				}
+				// --- FIN DU BLOC BARÈME DE PRIX ---
+
+				
 				$this->_pagefoot($pdf, $object, $outputlangs);
 				if (method_exists($pdf, 'AliasNbPages')) {
 					$pdf->AliasNbPages();  // @phan-suppress-current-line PhanUndeclaredMethod
@@ -501,56 +542,6 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				dolChmod($file);
 
 				$this->result = array('fullpath' => $file);
-
-				// -------------------------------------------------------------
-				// AJOUT DU BARÈME DE PRIX EN BAS DE PAGE (Strict Minimum)
-				// -------------------------------------------------------------
-				// On force la position verticale à 65mm du bas de la page
-				$pdf->SetY(-65); 
-				
-				// Homogénéisation de la police avec les variables Dolibarr existantes
-				$pdf->SetFont('', 'B', $default_font_size + 1);
-				$pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
-				
-				$pdf->SetFont('', '', $default_font_size);
-				
-				// En-têtes du tableau (190mm de large au total pour s'aligner sur les marges)
-				$pdf->Cell(150, 5, 'Désignation', 1, 0, 'L');
-				$pdf->Cell(40, 5, 'Prix', 1, 1, 'R');
-				
-				// Requête SQL corrigée : 'S04' au lieu de 'SO4'
-				$sql = "SELECT p.label, p.price";
-				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
-				$sql .= " WHERE p.fk_product_type = 1"; 
-				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'S04')"; 
-				$sql .= " ORDER BY p.label ASC";
-				
-				$resql = $this->db->query($sql);
-				if ($resql) {
-				    $num = $this->db->num_rows($resql);
-				    for ($i = 0; $i < $num; $i++) {
-				        $obj = $this->db->fetch_object($resql);
-				        if (empty($obj)) continue;
-				
-				        // Correction : Remplacement de escapetext() par le décodage natif
-				        $label_propre = html_entity_decode($obj->label, ENT_QUOTES, 'UTF-8');
-				        $price_formatted = price($obj->price, 0, $outputlangs, 1, -1, -1, $conf->currency);
-				
-				        $pdf->Cell(150, 5, $label_propre, 1, 0, 'L');
-				        $pdf->Cell(40, 5, $price_formatted, 1, 1, 'R');
-				    }
-				    $this->db->free($resql);
-				}
-				// FIN BAREME
-
-
-
-
-
-
-
-
-
 				
 				return 1;
 			} else {
