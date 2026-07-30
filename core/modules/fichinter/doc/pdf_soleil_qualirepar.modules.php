@@ -467,15 +467,14 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					}
 				}
 
-				/ 1. On dessine le grand cadre rectangulaire de la description
-				// MODIFICATION CHIRURGICALE : On remplace la formule complexe par ($nexY - $tab_top + 4)
-				// Cela force le rectangle à s'ajuster AUTOMATIQUEMENT à la taille du texte écrit
+				// 1. On dessine le grand cadre rectangulaire de la description
+				// Fixation de la hauteur à 40mm pour raccourcir le cadre et créer l'espace blanc
 				if ($pagenb == 1) {
-					$this->_tableau($pdf, $tab_top, $nexY - $tab_top + 4, 0, $outputlangs, 0, 1, $object);
-					$bottomlasttab = $nexY + 5;
+					$this->_tableau($pdf, $tab_top, 40, 0, $outputlangs, 0, 1, $object);
+					$bottomlasttab = $tab_top + 40 + 1;
 				} else {
-					$this->_tableau($pdf, $tab_top_newpage, $nexY - $tab_top_newpage + 4, 0, $outputlangs, 1, 1, $object);
-					$bottomlasttab = $nexY + 5;
+					$this->_tableau($pdf, $tab_top_newpage, 40, 0, $outputlangs, 1, 1, $object);
+					$bottomlasttab = $tab_top_newpage + 40 + 1;
 				}
 
 				// AJOUT DE LA LIGNE DE SÉPARATION (Ferme le bas du petit cadre proprement)
