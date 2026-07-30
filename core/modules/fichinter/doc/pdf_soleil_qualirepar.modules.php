@@ -311,19 +311,19 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->Cell($colW - 22, 4, $object->array_options['options_modele']);
 				
 				// Ligne 2
-				$pdf->SetXY($boxX + 2, $boxY + $rowH * 3 + 1);
+				$pdf->SetXY($boxX + 2, $boxY + $rowH * 2 + 1);
 				$pdf->SetFont('', 'B', 8);
 				$pdf->Cell(22, 4, "N° série :");
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell($colW - 26, 4, $object->array_options['options_serial']);
 				
-				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 3 + 1);
+				$pdf->SetXY($boxX + $colW + 2, $boxY + $rowH * 2 + 1);
 				$pdf->SetFont('', 'B', 8);
 				$pdf->Cell(28, 4, "Budget max :");
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell($colW - 32, 4, price($object->array_options['options_budget_max']));
 
-				$tab_top += 32;
+				//$tab_top += 32;
 
 
 				
