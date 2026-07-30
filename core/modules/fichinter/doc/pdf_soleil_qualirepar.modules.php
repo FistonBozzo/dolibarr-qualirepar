@@ -479,10 +479,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 
 
 				//BAREME
-				// 1. On dessine d'abord la zone de signature tout en bas de la page
-				$this->_pagefoot($pdf, $object, $outputlangs);
-
-				// 2. Préparation des colonnes et de la requête pour le calcul dynamique
+				// 1. Préparation des colonnes pour le barème de prix
 				$col1_width = 140; 
 				$col2_width = 50;  
 				
@@ -496,33 +493,21 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				if ($resql) {
 				    $num = $this->db->num_rows($resql);
 				    
-				    // --- CALCUL DYNAMIQUE DE LA POSITION ---
-				    $hauteur_titre = 5;       // Espace pour le titre 'Barème de prix'
-				    $hauteur_entete = 5;      // Espace pour la ligne 'Désignation / Prix'
-				    $hauteur_par_ligne = 5;   // Espace pour chaque forfait trouvé en base
-				    $marge_securite = 8;      // Zone blanche de respiration au-dessus des signatures
+				    // --- CALCUL DYNAMIQUE ---
+				    $hauteur_lignes = ($num + 2) * 5; // Nombre de lignes + en-tête + titre
 				    
-				    // Calcul de la taille totale que va prendre le tableau
-				    $hauteur_totale_tableau = $hauteur_titre + $hauteur_entete + ($num * $hauteur_par_ligne) + $marge_securite;
+				    // On place le barème à une hauteur fixe de sécurité par rapport au bas de la page
+				    // Plus il y a de lignes, plus le haut du tableau va monter (grandit vers le haut)
+				    $pdf->SetY(-45 - $hauteur_lignes); 
 				    
-				    // La zone signature de Dolibarr commence à -40mm du bas de la feuille.
-				    // On remonte le curseur de la hauteur exacte requise par le tableau.
-				    $position_y_dynamique = -40 - $hauteur_totale_tableau;
-				    
-				    // Application de la coordonnée verticale calculée
-				    $pdf->SetY($position_y_dynamique); 
-				    
-				    // --- AFFICHAGE DU TABLEAU ---
+				    // --- AFFICHAGE DU BARÈME ---
 				    $pdf->SetFont('Helvetica', 'B', $default_font_size + 1);
 				    $pdf->Cell(0, 5, 'Barème de prix', 0, 1, 'L');
 				    
 				    $pdf->SetFont('Helvetica', '', $default_font_size);
-				    
-				    // En-têtes du barème alignés sur la boîte principale
 				    $pdf->Cell($col1_width, 5, 'Désignation', 1, 0, 'L');
 				    $pdf->Cell($col2_width, 5, 'Prix', 1, 1, 'R');
 				    
-				    // Injection des lignes de produits
 				    for ($i = 0; $i < $num; $i++) {
 				        $obj = $this->db->fetch_object($resql);
 				        if (empty($obj)) continue;
@@ -535,6 +520,11 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				    }
 				    $this->db->free($resql);
 				}
+
+				// 2. FORCE L'AFFICHAGE DES SIGNATURES TOUT EN BAS
+				// On force le curseur Y à descendre à 35mm du bas absolu avant de dessiner les signatures
+				$pdf->SetY(-35);
+				$this->_pagefoot($pdf, $object, $outputlangs);
 				//FIN BAREME
 
 				
