@@ -485,6 +485,8 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$pdf->MultiCell(30, 5, 'Prix HT', 1, 0, 'R');
 				$pdf->MultiCell(30, 5, 'Prix TTC', 1, 1, 'R');
 				
+				$posY += 5; // avancer après l'en-tête
+				
 				// Liste précise de services (par référence)
 				$sql = "SELECT p.label, p.price, p.price_ttc, p.tva_tx, p.ref";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
@@ -495,30 +497,17 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$resql = $this->db->query($sql);
 				if ($resql) {
 				    $num = $this->db->num_rows($resql);
-				
-				    // DEBUG: afficher le nombre de lignes trouvées
-				    $pdf->Ln(2);
-				    $pdf->SetFont('Helvetica', 'I', 8);
-				    $pdf->MultiCell(0, 4, 'Services trouvés: ' . $num, 0, 1, 'L');
-				
-				    if ($num == 0) {
-				        // DEBUG: afficher la requête pour vérification
-				        $pdf->MultiCell(0, 4, 'Requête: ' . $sql, 0, 1, 'L');
-				    }
-				
 				    for ($i = 0; $i < $num; $i++) {
 				        $obj = $this->db->fetch_object($resql);
-				        $posY += 5;
 				        $pdf->SetXY($posX, $posY);
 				        $pdf->MultiCell(120, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
 				        $pdf->MultiCell(30, 5, price($obj->price), 1, 0, 'R');
 				        $pdf->MultiCell(30, 5, price($obj->price_ttc), 1, 1, 'R');
+				        $posY += 5;
 				    }
 				    $this->db->free($resql);
 				} else {
-				    $pdf->Ln(2);
-				    $pdf->SetFont('Helvetica', 'I', 8);
-				    $pdf->MultiCell(0, 4, 'Erreur SQL: ' . $this->db->error(), 0, 1, 'L');
+				    dol_syslog("Erreur SQL dans pdf_soleil_qualirepar: " . $this->db->error(), LOG_ERR);
 				}
 				// === Fin du barème de prix ===
 				
