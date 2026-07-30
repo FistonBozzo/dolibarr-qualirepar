@@ -427,45 +427,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 						}
 
 						$pdf->SetFont('', '', $default_font_size - 1); // We reposition the default font
-
-						// --- Début du barème de prix ---
-						$pdf->SetFont('Helvetica', 'B', 10);
-						$pdf->Ln(5);
-						$pdf->MultiCell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
-						
-						$pdf->SetFont('Helvetica', '', 9);
-						$posY = $pdf->GetY();
-						$posX = $this->marge_gauche;
-						
-						// En-têtes du tableau
-						$pdf->SetXY($posX, $posY);
-						$pdf->MultiCell(120, 5, 'Désignation', 1, 0, 'L');
-						$pdf->MultiCell(30, 5, 'Prix HT', 1, 0, 'R');
-						$pdf->MultiCell(30, 5, 'Prix TTC', 1, 1, 'R');
-						
-						// Liste précise de services (par référence)
-						$sql = "SELECT p.label, p.price, p.price_ttc, p.tva_tx, p.ref";
-						$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
-						$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
-						$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')"; // À adapter
-						$sql .= " ORDER BY p.label ASC";
-						
-						$resql = $this->db->query($sql);
-						if ($resql) {
-							$num = $this->db->num_rows($resql);
-							for ($i = 0; $i < $num; $i++) {
-								$obj = $this->db->fetch_object($resql);
-								$posY += 5;
-								$pdf->SetXY($posX, $posY);
-								$pdf->MultiCell(120, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
-								$pdf->MultiCell(30, 5, price($obj->price), 1, 0, 'R');
-								$pdf->MultiCell(30, 5, price($obj->price_ttc), 1, 1, 'R');
-							}
-							$this->db->free($resql);
-						}
-						// --- Fin du barème de prix ---
-
-					
+				
 						// Detect if some page were added automatically and output _tableau for past pages
 						while ($pagenb < $pageposafter) {
 							$pdf->setPage($pagenb);
@@ -505,6 +467,70 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 					}
 				}
 
+
+
+
+				// === Début du barème de prix ===
+				$pdf->SetFont('Helvetica', 'B', 10);
+				$pdf->Ln(10);
+				$pdf->MultiCell(0, 5, 'Barème de prix (hors taxes)', 0, 1, 'L');
+				
+				$pdf->SetFont('Helvetica', '', 9);
+				$posY = $pdf->GetY();
+				$posX = $this->marge_gauche;
+				
+				// En-têtes du tableau
+				$pdf->SetXY($posX, $posY);
+				$pdf->MultiCell(120, 5, 'Désignation', 1, 0, 'L');
+				$pdf->MultiCell(30, 5, 'Prix HT', 1, 0, 'R');
+				$pdf->MultiCell(30, 5, 'Prix TTC', 1, 1, 'R');
+				
+				// Liste précise de services (par référence)
+				$sql = "SELECT p.label, p.price, p.price_ttc, p.tva_tx, p.ref";
+				$sql .= " FROM ".MAIN_DB_PREFIX."product as p";
+				$sql .= " WHERE p.fk_product_type = 1"; // 1 = service
+				$sql .= " AND p.ref IN ('S01', 'S02', 'S03', 'SO4')"; // À adapter
+				$sql .= " ORDER BY p.label ASC";
+				
+				$resql = $this->db->query($sql);
+				if ($resql) {
+				    $num = $this->db->num_rows($resql);
+				
+				    // DEBUG: afficher le nombre de lignes trouvées
+				    $pdf->Ln(2);
+				    $pdf->SetFont('Helvetica', 'I', 8);
+				    $pdf->MultiCell(0, 4, 'Services trouvés: ' . $num, 0, 1, 'L');
+				
+				    if ($num == 0) {
+				        // DEBUG: afficher la requête pour vérification
+				        $pdf->MultiCell(0, 4, 'Requête: ' . $sql, 0, 1, 'L');
+				    }
+				
+				    for ($i = 0; $i < $num; $i++) {
+				        $obj = $this->db->fetch_object($resql);
+				        $posY += 5;
+				        $pdf->SetXY($posX, $posY);
+				        $pdf->MultiCell(120, 5, $pdf->escapetext($obj->label), 1, 0, 'L');
+				        $pdf->MultiCell(30, 5, price($obj->price), 1, 0, 'R');
+				        $pdf->MultiCell(30, 5, price($obj->price_ttc), 1, 1, 'R');
+				    }
+				    $this->db->free($resql);
+				} else {
+				    $pdf->Ln(2);
+				    $pdf->SetFont('Helvetica', 'I', 8);
+				    $pdf->MultiCell(0, 4, 'Erreur SQL: ' . $this->db->error(), 0, 1, 'L');
+				}
+				// === Fin du barème de prix ===
+				
+				// Show square
+				if ($pagenb == 1) {
+				    // ...
+
+
+
+
+
+				
 				// Show square
 				if ($pagenb == 1) {
 					$this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 0, $object);
