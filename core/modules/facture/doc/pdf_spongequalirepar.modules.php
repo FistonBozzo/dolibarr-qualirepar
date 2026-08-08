@@ -555,7 +555,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// --------------------------------------------------
 				
 				$boxX = $this->marge_gauche;
-				$boxY = $this->tab_top;
+				$boxY = $this->tab_top -5;
 				
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
@@ -750,7 +750,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// --------------------------------------------------
 				
 				// 12 mm de tableau + 3 mm d'espacement
-				$this->tab_top = $boxY + $boxH + 5;
+				$this->tab_top = $boxY + $boxH + 8;
 				
 				//********************
 				//Fin Identification
