@@ -483,24 +483,28 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// You can add more thing under header here, if you increase $extra_under_address_shift too.
 				$extra_under_address_shift = 0;
 				
-
-				// ------------------------
+				// --------------------------------------------------
+				// Position de départ après les blocs d'adresses
+				// --------------------------------------------------
+				
+				$this->tab_top = 90 + $top_shift + $shipp_shift;
+				
+				// --------------------------------------------------
 				// Identification appareil
-				// ------------------------
+				// --------------------------------------------------
 				
 				$boxX = $this->marge_gauche;
-				$boxY = $this->tab_top + 2; // seulement 2 mm sous les adresses
-				
+				$boxY = $this->tab_top;
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
 				$rowH = 6;
-				$boxH = $rowH * 2;
+				$boxH = $rowH * 3;
 				$colW = $boxW / 2;
 				
 				// Cadre
 				$pdf->Rect($boxX, $boxY, $boxW, $boxH);
 				
-				// Séparation horizontale entre les 2 lignes
+				// Ligne sous le titre
 				$pdf->Line(
 				    $boxX,
 				    $boxY + $rowH,
@@ -508,25 +512,32 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				    $boxY + $rowH
 				);
 				
-				// Séparation verticale
+				// Ligne entre les informations
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH * 2,
+				    $boxX + $boxW,
+				    $boxY + $rowH * 2
+				);
+				
+				// Séparation verticale uniquement sur les lignes d'informations
 				$pdf->Line(
 				    $boxX + $colW,
-				    $boxY,
+				    $boxY + $rowH,
 				    $boxX + $colW,
 				    $boxY + $boxH
 				);
 				
-				// Largeur réservée au libellé
+				// Largeur du libellé
 				$labelW = 35;
 				
-				
-				// ------------------------
+				// --------------------------------------------------
 				// Ligne 1 : Marque / Modèle
-				// ------------------------
+				// --------------------------------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + 1);
-				$pdf->Cell($labelW, 4, "Marque :");
+				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, 'Marque :');
 				
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell(
@@ -536,8 +547,8 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + 1);
-				$pdf->Cell($labelW, 4, "Modèle :");
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, 'Modèle :');
 				
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell(
@@ -546,14 +557,13 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				    $object->array_options['options_modele'] ?? ''
 				);
 				
-				
-				// ------------------------
-				// Ligne 2 : Série / Budget
-				// ------------------------
+				// --------------------------------------------------
+				// Ligne 2 : N° série / Budget maximum
+				// --------------------------------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, "N° série :");
+				$pdf->SetXY($boxX + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, 'N° série :');
 				
 				$pdf->SetFont('', '', 8);
 				$pdf->Cell(
@@ -563,8 +573,8 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, "Budget max :");
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, 'Budget max :');
 				
 				$pdf->SetFont('', '', 8);
 				
@@ -580,12 +590,17 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				    $budget_text
 				);
 				
+				// --------------------------------------------------
+				// Faire avancer le flux Dolibarr
+				// --------------------------------------------------
 				
-				// ----------------------------------------------------
-				// Espace occupé sous l'adresse
-				// ----------------------------------------------------
+				// Hauteur réelle du bloc + petit espacement
+				$this->tab_top = $boxY + $boxH + 3;
 				
-				$extra_under_address_shift += $boxH + 4;
+				
+				
+				
+				
 				// Fin identification appareil
 
 
