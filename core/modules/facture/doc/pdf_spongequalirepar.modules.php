@@ -488,6 +488,8 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// --------------------------------------------------
 				
 				$this->tab_top = 90 + $top_shift + $shipp_shift;
+
+
 				
 				// --------------------------------------------------
 				// Identification appareil
@@ -495,16 +497,17 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				
 				$boxX = $this->marge_gauche;
 				$boxY = $this->tab_top;
+				
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
 				$rowH = 6;
-				$boxH = $rowH * 3;
+				$boxH = $rowH * 2;
 				$colW = $boxW / 2;
 				
-				// Cadre
+				// Cadre extérieur
 				$pdf->Rect($boxX, $boxY, $boxW, $boxH);
 				
-				// Ligne sous le titre
+				// Séparation horizontale entre les 2 lignes
 				$pdf->Line(
 				    $boxX,
 				    $boxY + $rowH,
@@ -512,23 +515,15 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				    $boxY + $rowH
 				);
 				
-				// Ligne entre les informations
-				$pdf->Line(
-				    $boxX,
-				    $boxY + $rowH * 2,
-				    $boxX + $boxW,
-				    $boxY + $rowH * 2
-				);
-				
-				// Séparation verticale uniquement sur les lignes d'informations
+				// Séparation verticale
 				$pdf->Line(
 				    $boxX + $colW,
-				    $boxY + $rowH,
+				    $boxY,
 				    $boxX + $colW,
 				    $boxY + $boxH
 				);
 				
-				// Largeur du libellé
+				// Largeur réservée au libellé
 				$labelW = 35;
 				
 				// --------------------------------------------------
@@ -536,7 +531,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// --------------------------------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
+				$pdf->SetXY($boxX + 3, $boxY + 1);
 				$pdf->Cell($labelW, 4, 'Marque :');
 				
 				$pdf->SetFont('', '', 8);
@@ -547,7 +542,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + 1);
 				$pdf->Cell($labelW, 4, 'Modèle :');
 				
 				$pdf->SetFont('', '', 8);
@@ -562,7 +557,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// --------------------------------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH * 2 + 1);
+				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
 				$pdf->Cell($labelW, 4, 'N° série :');
 				
 				$pdf->SetFont('', '', 8);
@@ -573,7 +568,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH * 2 + 1);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
 				$pdf->Cell($labelW, 4, 'Budget max :');
 				
 				$pdf->SetFont('', '', 8);
@@ -591,11 +586,11 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				// --------------------------------------------------
-				// Faire avancer le flux Dolibarr
+				// Position réelle après le bloc
 				// --------------------------------------------------
 				
-				// Hauteur réelle du bloc + petit espacement
-				$this->tab_top = $boxY + $boxH + 3;
+				// 12 mm de bloc + 2 mm d'espace
+				$this->tab_top = $boxY + $boxH + 2;
 				
 				
 				
