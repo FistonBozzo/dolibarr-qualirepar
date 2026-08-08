@@ -584,7 +584,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				// Espace sous le tableau
-				$tab_top += 25;
+				$extra_under_address_shift = 25;
 
 				// Fin identification appareil
 
