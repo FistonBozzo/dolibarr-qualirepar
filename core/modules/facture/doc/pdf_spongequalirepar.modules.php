@@ -489,20 +489,18 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// ------------------------
 				
 				$boxX = $this->marge_gauche;
-				
-				// On part de la position prévue après l'en-tête
-				$boxY = $this->tab_top;
+				$boxY = $this->tab_top + 2; // seulement 2 mm sous les adresses
 				
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
 				$rowH = 6;
-				$boxH = $rowH * 3;
+				$boxH = $rowH * 2;
 				$colW = $boxW / 2;
 				
 				// Cadre
 				$pdf->Rect($boxX, $boxY, $boxW, $boxH);
 				
-				// Ligne 1
+				// Séparation horizontale entre les 2 lignes
 				$pdf->Line(
 				    $boxX,
 				    $boxY + $rowH,
@@ -510,31 +508,24 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				    $boxY + $rowH
 				);
 				
-				// Ligne 2
-				$pdf->Line(
-				    $boxX,
-				    $boxY + ($rowH * 2),
-				    $boxX + $boxW,
-				    $boxY + ($rowH * 2)
-				);
-				
 				// Séparation verticale
 				$pdf->Line(
 				    $boxX + $colW,
-				    $boxY + $rowH,
+				    $boxY,
 				    $boxX + $colW,
 				    $boxY + $boxH
 				);
 				
+				// Largeur réservée au libellé
 				$labelW = 35;
 				
 				
 				// ------------------------
-				// Ligne 1
+				// Ligne 1 : Marque / Modèle
 				// ------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
+				$pdf->SetXY($boxX + 3, $boxY + 1);
 				$pdf->Cell($labelW, 4, "Marque :");
 				
 				$pdf->SetFont('', '', 8);
@@ -545,7 +536,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + 1);
 				$pdf->Cell($labelW, 4, "Modèle :");
 				
 				$pdf->SetFont('', '', 8);
@@ -557,11 +548,11 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				
 				
 				// ------------------------
-				// Ligne 2
+				// Ligne 2 : Série / Budget
 				// ------------------------
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + ($rowH * 2) + 1);
+				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
 				$pdf->Cell($labelW, 4, "N° série :");
 				
 				$pdf->SetFont('', '', 8);
@@ -572,7 +563,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				);
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + ($rowH * 2) + 1);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
 				$pdf->Cell($labelW, 4, "Budget max :");
 				
 				$pdf->SetFont('', '', 8);
@@ -591,11 +582,10 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				
 				
 				// ----------------------------------------------------
-				// On réserve la hauteur réellement occupée par le bloc
+				// Espace occupé sous l'adresse
 				// ----------------------------------------------------
 				
-				$extra_under_address_shift += $boxH + 5;
-
+				$extra_under_address_shift += $boxH + 4;
 				// Fin identification appareil
 
 
