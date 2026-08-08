@@ -483,122 +483,8 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				// You can add more thing under header here, if you increase $extra_under_address_shift too.
 				$extra_under_address_shift = 0;
 				
-				// --------------------------------------------------
-				// Position de départ après les blocs d'adresses
-				// --------------------------------------------------
-				
-				$this->tab_top = 90 + $top_shift + $shipp_shift;
-
 
 				
-				// --------------------------------------------------
-				// Identification appareil
-				// --------------------------------------------------
-				
-				$boxX = $this->marge_gauche;
-				$boxY = $this->tab_top;
-				
-				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
-				
-				$rowH = 6;
-				$boxH = $rowH * 2;
-				$colW = $boxW / 2;
-				
-				// Cadre extérieur
-				$pdf->Rect($boxX, $boxY, $boxW, $boxH);
-				
-				// Séparation horizontale entre les 2 lignes
-				$pdf->Line(
-				    $boxX,
-				    $boxY + $rowH,
-				    $boxX + $boxW,
-				    $boxY + $rowH
-				);
-				
-				// Séparation verticale
-				$pdf->Line(
-				    $boxX + $colW,
-				    $boxY,
-				    $boxX + $colW,
-				    $boxY + $boxH
-				);
-				
-				// Largeur réservée au libellé
-				$labelW = 35;
-				
-				// --------------------------------------------------
-				// Ligne 1 : Marque / Modèle
-				// --------------------------------------------------
-				
-				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + 1);
-				$pdf->Cell($labelW, 4, 'Marque :');
-				
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell(
-				    $colW - $labelW - 5,
-				    4,
-				    $object->array_options['options_marque'] ?? ''
-				);
-				
-				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + 1);
-				$pdf->Cell($labelW, 4, 'Modèle :');
-				
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell(
-				    $colW - $labelW - 5,
-				    4,
-				    $object->array_options['options_modele'] ?? ''
-				);
-				
-				// --------------------------------------------------
-				// Ligne 2 : N° série / Budget maximum
-				// --------------------------------------------------
-				
-				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, 'N° série :');
-				
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell(
-				    $colW - $labelW - 5,
-				    4,
-				    $object->array_options['options_serial'] ?? ''
-				);
-				
-				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, 'Budget max :');
-				
-				$pdf->SetFont('', '', 8);
-				
-				$budget_clean = (float) ($object->array_options['options_budget_max'] ?? 0);
-				
-				$budget_text = $budget_clean > 0
-				    ? price($budget_clean, 0, $outputlangs, 1, -1, -1, $conf->currency)
-				    : '';
-				
-				$pdf->Cell(
-				    $colW - $labelW - 5,
-				    4,
-				    $budget_text
-				);
-				
-				// --------------------------------------------------
-				// Position réelle après le bloc
-				// --------------------------------------------------
-				
-				// 12 mm de bloc + 2 mm d'espace
-				$this->tab_top = $boxY + $boxH + 2;
-				
-				
-				
-				
-				
-				// Fin identification appareil
-
-
 				$qrcodestring = '';
 				if (getDolGlobalString('INVOICE_ADD_ZATCA_QR_CODE')) {
 					$qrcodestring = $object->buildZATCAQRString();
@@ -652,6 +538,226 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 				$this->tab_top += $extra_under_address_shift;
 				$this->tab_top_newpage += 0;
 
+				//********************
+				//Début Identification
+				//********************
+
+
+				// --------------------------------------------------
+				// Identification appareil
+				// --------------------------------------------------
+				// Ce bloc est placé après tous les éléments sous l'adresse
+				// et AVANT le calcul de $tab_height du tableau de facturation.
+				//
+				// La position suivante du contenu est ensuite donnée à
+				// $this->tab_top afin que le moteur PDF natif de Dolibarr
+				// calcule dynamiquement la hauteur disponible.
+				// --------------------------------------------------
+				
+				$boxX = $this->marge_gauche;
+				$boxY = $this->tab_top;
+				
+				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
+				
+				$rowH = 6;
+				$boxH = $rowH * 2;
+				$colW = $boxW / 2;
+				$labelW = 35;
+				
+				// --------------------------------------------------
+				// Vérification de l'espace disponible
+				// --------------------------------------------------
+				
+				$availableHeight =
+				    $this->page_hauteur
+				    - $boxY
+				    - $this->heightforfooter
+				    - $this->heightforfreetext
+				    - $this->heightforinfotot;
+				
+				// Si le tableau appareil ne tient pas correctement,
+				// on passe à la page suivante.
+				if ($availableHeight < ($boxH + 10)) {
+				
+				    $pdf->AddPage();
+				
+				    if (!empty($tplidx)) {
+				        $pdf->useTemplate($tplidx);
+				    }
+				
+				    $pagenb++;
+				
+				    if (!getDolGlobalInt('MAIN_PDF_DONOTREPEAT_HEAD')) {
+				        $this->_pagehead(
+				            $pdf,
+				            $object,
+				            0,
+				            $outputlangs,
+				            $outputlangsbis
+				        );
+				    }
+				
+				    $this->tab_top = $this->tab_top_newpage;
+				
+				    $boxY = $this->tab_top;
+				}
+				
+				// --------------------------------------------------
+				// Cadre du tableau
+				// --------------------------------------------------
+				
+				$pdf->SetDrawColor(128, 128, 128);
+				
+				$pdf->Rect(
+				    $boxX,
+				    $boxY,
+				    $boxW,
+				    $boxH
+				);
+				
+				// Ligne horizontale centrale
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH,
+				    $boxX + $boxW,
+				    $boxY + $rowH
+				);
+				
+				// Ligne verticale centrale
+				$pdf->Line(
+				    $boxX + $colW,
+				    $boxY,
+				    $boxX + $colW,
+				    $boxY + $boxH
+				);
+				
+				// --------------------------------------------------
+				// Ligne 1 : Marque / Modèle
+				// --------------------------------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + 3,
+				    $boxY + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    'Marque :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_marque'] ?? ''
+				);
+				
+				// Modèle
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + $colW + 3,
+				    $boxY + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    'Modèle :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_modele'] ?? ''
+				);
+				
+				// --------------------------------------------------
+				// Ligne 2 : N° série / Budget maximum
+				// --------------------------------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + 3,
+				    $boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    'N° série :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_serial'] ?? ''
+				);
+				
+				// Budget maximum
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + $colW + 3,
+				    $boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    'Budget max :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$budget_clean = (float) (
+				    $object->array_options['options_budget_max'] ?? 0
+				);
+				
+				$budget_text = '';
+				
+				if ($budget_clean > 0) {
+				    $budget_text = price(
+				        $budget_clean,
+				        0,
+				        $outputlangs,
+				        1,
+				        -1,
+				        -1,
+				        $conf->currency
+				    );
+				}
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $budget_text
+				);
+				
+				// --------------------------------------------------
+				// IMPORTANT
+				// On indique au moteur Dolibarr où commence
+				// réellement le contenu suivant.
+				// --------------------------------------------------
+				
+				// 12 mm de tableau + 3 mm d'espacement
+				$this->tab_top = $boxY + $boxH + 3;
+				
+				//********************
+				//Fin Identification
+				//********************
+
+
+				
 
 				// Define height of table for lines (for first page)
 				$tab_height = $this->page_hauteur - $this->tab_top - $this->heightforfooter - $this->heightforfreetext - $this->getHeightForQRInvoice(1, $object, $langs);
