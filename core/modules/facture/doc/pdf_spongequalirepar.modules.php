@@ -482,6 +482,113 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 
 				// You can add more thing under header here, if you increase $extra_under_address_shift too.
 				$extra_under_address_shift = 0;
+				
+
+				// ------------------------
+				// Identification appareil
+				// ------------------------
+				
+				$boxX = $this->marge_gauche;
+				$boxY = $tab_top;
+				$boxW = 190;
+				$rowH = 6;
+				$colW = $boxW / 2;
+				
+				// Cadre
+				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 3);
+				
+				// Trait sous le titre
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH,
+				    $boxX + $boxW,
+				    $boxY + $rowH
+				);
+				
+				// Trait entre les deux lignes
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH * 2,
+				    $boxX + $boxW,
+				    $boxY + $rowH * 2
+				);
+				
+				// Séparation verticale
+				$pdf->Line(
+				    $boxX + $colW,
+				    $boxY + $rowH,
+				    $boxX + $colW,
+				    $boxY + $rowH * 3
+				);
+				
+				// Largeur réservée au libellé
+				$labelW = 35;
+				
+				// ------------------------
+				// Ligne 1
+				// ------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, "Marque :");
+				
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_marque'] ?? ''
+				);
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
+				$pdf->Cell($labelW, 4, "Modèle :");
+				
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_modele'] ?? ''
+				);
+				
+				// ------------------------
+				// Ligne 2
+				// ------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, "N° série :");
+				
+				$pdf->SetFont('', '', 8);
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_serial'] ?? ''
+				);
+				
+				$pdf->SetFont('', 'B', 8);
+				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH * 2 + 1);
+				$pdf->Cell($labelW, 4, "Budget max :");
+				
+				$pdf->SetFont('', '', 8);
+				
+				$budget_clean = (float) ($object->array_options['options_budget_max'] ?? 0);
+				
+				$budget_text = $budget_clean > 0
+				    ? price($budget_clean, 0, $outputlangs, 1, -1, -1, $conf->currency)
+				    : '';
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $budget_text
+				);
+				
+				// Espace sous le tableau
+				$tab_top += 25;
+
+				// Fin identification appareil
+
+
 				$qrcodestring = '';
 				if (getDolGlobalString('INVOICE_ADD_ZATCA_QR_CODE')) {
 					$qrcodestring = $object->buildZATCAQRString();
