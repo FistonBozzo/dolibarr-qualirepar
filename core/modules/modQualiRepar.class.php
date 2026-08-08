@@ -70,26 +70,35 @@ class modQualiRepar extends DolibarrModules
     }
 
 
-    /**
-     * Activation du module
+ /**
+ * Activation du module
+ */
+public function init($options = '')
+{
+    global $conf;
+
+    require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+
+    $extrafields = new ExtraFields($this->db);
+
+    /*
+     * Extrafields communs aux interventions, devis et factures
      */
-    public function init($options = '')
-    {
-        global $conf;
-    
-        require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-    
-        $extrafields = new ExtraFields($this->db);
-    
+
+    $objects = array('fichinter', 'propal', 'facture');
+
+    foreach ($objects as $objecttype) {
+
+        // Marque
         $extrafields->addExtraField(
-            'bonus_reparation',
-            'Bonus réparation QualiRépar',
-            'price',
+            'marque',
+            'Marque',
+            'varchar',
             100,
-            '',
-            'facture',
-            1,
-            1,
+            255,
+            $objecttype,
+            0,
+            0,
             '',
             '',
             0,
@@ -98,16 +107,17 @@ class modQualiRepar extends DolibarrModules
             '',
             ''
         );
-    
+
+        // Modèle
         $extrafields->addExtraField(
-            'afficher_bonus_reparation',
-            'Afficher bonus',
-            'boolean',
+            'modele',
+            'Modèle',
+            'varchar',
             101,
-            '',
-            'facture',
-            1,
-            1,
+            255,
+            $objecttype,
+            0,
+            0,
             '',
             '',
             0,
@@ -116,30 +126,113 @@ class modQualiRepar extends DolibarrModules
             '',
             ''
         );
-    
-    
-        // Création du modèle PDF intervention QualiRépar
-        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model";
-        $sql .= " WHERE nom='soleil_qualirepar'";
-        $sql .= " AND type='ficheinter'";
-        $sql .= " AND entity=".(int) $conf->entity;
-    
-        $resql = $this->db->query($sql);
-    
-        if ($resql && $this->db->num_rows($resql) == 0) {
-    
-            $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model";
-            $sql .= " (nom, entity, type, libelle)";
-            $sql .= " VALUES ('soleil_qualirepar', "
-                 .(int) $conf->entity
-                 .", 'ficheinter', 'Soleil QualiRépar')";
-    
-            $this->db->query($sql);
-        }
-    
-    
-        return $this->_init(array(), $options);
+
+        // Numéro de série
+        $extrafields->addExtraField(
+            'serial',
+            'Numéro de série',
+            'varchar',
+            102,
+            255,
+            $objecttype,
+            0,
+            0,
+            '',
+            '',
+            0,
+            '',
+            '',
+            '',
+            ''
+        );
+
+        // Budget Max
+        $extrafields->addExtraField(
+            'budget_max',
+            'Budget Max',
+            'price',
+            103,
+            '',
+            $objecttype,
+            0,
+            0,
+            '',
+            '',
+            0,
+            '',
+            '',
+            '',
+            ''
+        );
     }
+
+
+    /*
+     * Extrafields spécifiques aux factures - QualiRépar
+     */
+
+    $extrafields->addExtraField(
+        'bonus_reparation',
+        'Bonus réparation QualiRépar',
+        'price',
+        200,
+        '',
+        'facture',
+        1,
+        1,
+        '',
+        '',
+        0,
+        '',
+        '',
+        '',
+        ''
+    );
+
+    $extrafields->addExtraField(
+        'afficher_bonus_reparation',
+        'Afficher bonus',
+        'boolean',
+        201,
+        '',
+        'facture',
+        1,
+        1,
+        '',
+        '',
+        0,
+        '',
+        '',
+        '',
+        ''
+    );
+
+
+    /*
+     * Création du modèle PDF intervention QualiRépar
+     */
+
+    $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model";
+    $sql .= " WHERE nom='soleil_qualirepar'";
+    $sql .= " AND type='ficheinter'";
+    $sql .= " AND entity=".(int) $conf->entity;
+
+    $resql = $this->db->query($sql);
+
+    if ($resql && $this->db->num_rows($resql) == 0) {
+
+        $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model";
+        $sql .= " (nom, entity, type, libelle)";
+        $sql .= " VALUES ('soleil_qualirepar', "
+             .(int) $conf->entity
+             .", 'ficheinter', 'Soleil QualiRépar')";
+
+        $this->db->query($sql);
+    }
+
+
+    return $this->_init(array(), $options);
+}
         
     
         /**
