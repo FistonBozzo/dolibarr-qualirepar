@@ -278,7 +278,7 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				// ------------------------
 				
 				$boxX = $this->marge_gauche;
-				$boxY = $tab_top;
+				$boxY = $tab_top - 5;
 				
 				// Largeur disponible réelle entre les marges
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
