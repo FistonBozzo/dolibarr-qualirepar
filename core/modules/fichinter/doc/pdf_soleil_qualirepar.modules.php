@@ -279,56 +279,237 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				
 				$boxX = $this->marge_gauche;
 				$boxY = $tab_top;
-				$boxW = 190;
+				
+				// Largeur disponible réelle entre les marges
+				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
+				
 				$rowH = 6;
+				$boxH = $rowH * 2;
 				$colW = $boxW / 2;
 				
-				// Cadre : 2 lignes 
-				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 2);
+				// Cadre du tableau
+				$pdf->Rect(
+				    $boxX,
+				    $boxY,
+				    $boxW,
+				    $boxH
+				);
 				
-				// Trait horizontal entre les deux lignes 
-				$pdf->Line( $boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH ); 
+				// Ligne horizontale centrale
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH,
+				    $boxX + $boxW,
+				    $boxY + $rowH
+				);
 				
-				// Séparation verticale 
-				$pdf->Line( $boxX + $colW, $boxY, $boxX + $colW, $boxY + $rowH * 2 );
+				// Séparation verticale centrale
+				$pdf->Line(
+				    $boxX + $colW,
+				    $boxY,
+				    $boxX + $colW,
+				    $boxY + $boxH
+				);
 				
-				// Largeur réservée au libellé
+				// Largeur réservée aux libellés
 				$labelW = 35;
 				
-				// Ligne 1
-				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, "Marque :");
 				
-				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_marque']);
+				// ========================
+				// Ligne 1 : Marque / Modèle
+				// ========================
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH + 1);
-				$pdf->Cell($labelW, 4, "Modèle :");
+				
+				$pdf->SetXY(
+				    $boxX + 3,
+				    $boxY + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    "Marque :"
+				);
 				
 				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_modele']);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_marque']
+				);
 				
 				
-				// Ligne 2
+				// Modèle
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + 3, $boxY + $rowH * 2 + 1);
-				$pdf->Cell($labelW, 4, "N° série :");
+				
+				$pdf->SetXY(
+				    $boxX + $colW + 3,
+				    $boxY + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    "Modèle :"
+				);
 				
 				$pdf->SetFont('', '', 8);
-				$pdf->Cell($colW - $labelW - 5, 4, $object->array_options['options_serial']);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_modele']
+				);
+				
+				
+				// ========================
+				// Ligne 2 : Série / Budget
+				// ========================
 				
 				$pdf->SetFont('', 'B', 8);
-				$pdf->SetXY($boxX + $colW + 3, $boxY + $rowH * 2 + 1);
-				$pdf->Cell($labelW, 4, "Budget max :");
+				
+				$pdf->SetXY(
+				    $boxX + 3,
+				    $boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    "N° série :"
+				);
 				
 				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_serial']
+				);
+				
+				
+				// Budget maximum
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + $colW + 3,
+				    $boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    "Budget max :"
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
 				$budget_clean = (float) $object->array_options['options_budget_max'];
-$pdf->			Cell($colW - $labelW - 5, 4, price($budget_clean, 0, $outputlangs, 1, -1, -1, $conf->currency));
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    price(
+				        $budget_clean,
+				        0,
+				        $outputlangs,
+				        1,
+				        -1,
+				        -1,
+				        $conf->currency
+				    )
+				);
+				
+				
+				// ========================
+				// Mise à jour dynamique
+				// ========================
+				
+				// Bas réel du tableau + espace avant la description
+				$tab_top = $boxY + $boxH + 4;
+				
+				
+				// ------------------------
+				// Description
+				// ------------------------
+				
+				$pdf->SetFont('', '', $default_font_size - 0.5);
+				
+				$pdf->SetXY(
+				    $this->marge_gauche,
+				    $tab_top + 1
+				);
+				
+				$pdf->MultiCell(
+				    $boxW,
+				    5,
+				    $outputlangs->transnoentities("Description"),
+				    0,
+				    'L',
+				    false
+				);
+				
+				// Ligne sous le titre Description
+				$pdf->Line(
+				    $this->marge_gauche,
+				    $tab_top + 5,
+				    $this->page_largeur - $this->marge_droite,
+				    $tab_top + 5
+				);
+				
+				$pdf->SetFont('', '', $default_font_size - 1);
+				
+				$pdf->SetXY(
+				    $this->marge_gauche,
+				    $tab_top + 5
+				);
+				
+				$text = $object->description;
+				
+				if ($object->duration > 0) {
+				    $totaltime = convertSecondToTime(
+				        $object->duration,
+				        'all',
+				        $conf->global->MAIN_DURATION_OF_WORKDAY
+				    );
+				
+				    $text .= ($text ? ' - ' : '')
+				        .$langs->trans("Total")
+				        .": "
+				        .$totaltime;
+				}
+				
+				$desc = dol_htmlentitiesbr($text, 1);
+				
+				$pdf->writeHTMLCell(
+				    $boxW,
+				    3,
+				    $this->posxdesc - 1,
+				    $tab_top + 5,
+				    $outputlangs->convToOutputCharset($desc),
+				    0,
+				    1
+				);
+				
+				$nexY = $pdf->GetY();
+				
+				// Ligne sous la description
+				$pdf->Line(
+				    $this->marge_gauche,
+				    $nexY,
+				    $this->page_largeur - $this->marge_droite,
+				    $nexY
+				);
 
-				$tab_top += 25;
 
+				//Fin identification
+
+				
+
+
+				
 
 				$pdf->SetFont('', '', $default_font_size - 0.5);
 				$pdf->SetXY($this->marge_gauche, $tab_top + 1);
