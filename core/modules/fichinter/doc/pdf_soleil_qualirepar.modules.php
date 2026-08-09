@@ -283,17 +283,14 @@ class pdf_soleil_qualirepar extends ModelePDFFicheinter
 				$rowH = 6;
 				$colW = $boxW / 2;
 				
-				// Cadre
-				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 3);
+				// Cadre : 2 lignes 
+				$pdf->Rect($boxX, $boxY, $boxW, $rowH * 2);
 				
-				// Trait sous le titre
-				$pdf->Line($boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH);
+				// Trait horizontal entre les deux lignes 
+				$pdf->Line( $boxX, $boxY + $rowH, $boxX + $boxW, $boxY + $rowH ); 
 				
-				// Trait entre les deux lignes
-				$pdf->Line($boxX, $boxY + $rowH * 2, $boxX + $boxW, $boxY + $rowH * 2);
-				
-				// Séparation verticale
-				$pdf->Line($boxX + $colW, $boxY + $rowH, $boxX + $colW, $boxY + $rowH * 3);
+				// Séparation verticale 
+				$pdf->Line( $boxX + $colW, $boxY, $boxX + $colW, $boxY + $rowH * 2 );
 				
 				// Largeur réservée au libellé
 				$labelW = 35;
