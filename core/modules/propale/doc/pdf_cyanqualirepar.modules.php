@@ -42,7 +42,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 /**
  *	Class to generate PDF proposal Cyan
  */
-class pdf_cyan extends ModelePDFPropales
+class pdf_cyanqualirepar extends ModelePDFPropales
 {
 	/**
 	 * @var DoliDB Database handler
@@ -93,8 +93,8 @@ class pdf_cyan extends ModelePDFPropales
 		$langs->loadLangs(array("main", "bills"));
 
 		$this->db = $db;
-		$this->name = "cyan";
-		$this->description = $langs->trans('DocModelCyanDescription');
+		$this->name = "cyanqualirepar";
+		$this->description = "Modèle Cyan QualiRépar";//$langs->trans('DocModelCyanDescription');
 		$this->update_main_doc_field = 1; // Save the name of generated file as the main doc when generating a doc with this template
 
 		// Dimension page
