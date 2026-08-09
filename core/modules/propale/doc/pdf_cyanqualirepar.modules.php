@@ -366,6 +366,215 @@ class pdf_cyan extends ModelePDFPropales
 
 				$nexY = $tab_top;
 
+
+
+				
+				//********************
+				//Début Identification
+				//********************
+				
+				// --------------------------------------------------
+				// Identification appareil
+				// --------------------------------------------------
+				
+				$boxX = $this->marge_gauche;
+				$boxY = $tab_top - 5;
+				
+				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
+				
+				$rowH = 6;
+				$boxH = $rowH * 2;
+				$colW = $boxW / 2;
+				$labelW = 35;
+				
+				// --------------------------------------------------
+				// Vérification de l'espace disponible
+				// --------------------------------------------------
+				
+				$availableHeight =
+					$this->page_hauteur
+					- $boxY
+					- $heightforfooter
+					- $heightforfreetext
+					- $heightforinfotot;
+				
+				if ($availableHeight < ($boxH + 10)) {
+				
+					$pdf->AddPage();
+				
+					if (!empty($tplidx)) {
+						$pdf->useTemplate($tplidx);
+					}
+				
+					$pagenb++;
+				
+					if (!getDolGlobalInt('MAIN_PDF_DONOTREPEAT_HEAD')) {
+						$this->_pagehead(
+							$pdf,
+							$object,
+							0,
+							$outputlangs,
+							$outputlangsbis
+						);
+					}
+				
+					$tab_top = $tab_top_newpage;
+					$boxY = $tab_top;
+				}
+				
+				// --------------------------------------------------
+				// Cadre du tableau
+				// --------------------------------------------------
+				
+				$pdf->SetDrawColor(128, 128, 128);
+				
+				$pdf->Rect(
+					$boxX,
+					$boxY,
+					$boxW,
+					$boxH
+				);
+				
+				$pdf->Line(
+					$boxX,
+					$boxY + $rowH,
+					$boxX + $boxW,
+					$boxY + $rowH
+				);
+				
+				$pdf->Line(
+					$boxX + $colW,
+					$boxY,
+					$boxX + $colW,
+					$boxY + $boxH
+				);
+				
+				// --------------------------------------------------
+				// Ligne 1 : Marque / Modèle
+				// --------------------------------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+					$boxX + 3,
+					$boxY + 1
+				);
+				
+				$pdf->Cell(
+					$labelW,
+					4,
+					'Marque :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+					$colW - $labelW - 5,
+					4,
+					$object->array_options['options_marque'] ?? ''
+				);
+				
+				// Modèle
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+					$boxX + $colW + 3,
+					$boxY + 1
+				);
+				
+				$pdf->Cell(
+					$labelW,
+					4,
+					'Modèle :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+					$colW - $labelW - 5,
+					4,
+					$object->array_options['options_modele'] ?? ''
+				);
+				
+				// --------------------------------------------------
+				// Ligne 2 : N° série / Budget maximum
+				// --------------------------------------------------
+				
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+					$boxX + 3,
+					$boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+					$labelW,
+					4,
+					'N° série :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+					$colW - $labelW - 5,
+					4,
+					$object->array_options['options_serial'] ?? ''
+				);
+				
+				// Budget maximum
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+					$boxX + $colW + 3,
+					$boxY + $rowH + 1
+				);
+				
+				$pdf->Cell(
+					$labelW,
+					4,
+					'Budget max :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$budget_clean = (float) (
+					$object->array_options['options_budget_max'] ?? 0
+				);
+				
+				$budget_text = '';
+				
+				if ($budget_clean > 0) {
+					$budget_text = price(
+						$budget_clean,
+						0,
+						$outputlangs,
+						1,
+						-1,
+						-1,
+						$conf->currency
+					);
+				}
+				
+				$pdf->Cell(
+					$colW - $labelW - 5,
+					4,
+					$budget_text
+				);
+				
+				// --------------------------------------------------
+				// Positionnement dynamique du tableau de devis
+				// --------------------------------------------------
+				
+				$tab_top = $boxY + $boxH + 8;
+				
+				//********************
+				//Fin Identification
+				//********************
+				
+
+
+
+				
 				// Incoterm
 				$height_incoterms = 0;
 				if (isModEnabled('incoterm')) {
