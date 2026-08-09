@@ -378,7 +378,7 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				// --------------------------------------------------
 				
 				$boxX = $this->marge_gauche;
-				$boxY = $tab_top - 5;
+				$boxY = $tab_top + 2;
 				
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
