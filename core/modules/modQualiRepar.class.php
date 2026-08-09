@@ -31,6 +31,9 @@ class modQualiRepar extends DolibarrModules
         $this->models = array(
             'ficheinter' => array(
                 'soleil_qualirepar'
+            ),
+            'propal' => array(
+                'cyanqualirepar'
             )
         );
 
