@@ -233,6 +233,24 @@ public function init($options = '')
         $this->db->query($sql);
     }
 
+    /* * 
+        Création du modèle PDF devis QualiRépar 
+    */
+    
+    $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model";
+    $sql .= " WHERE nom='cyanqualirepar'";
+    $sql .= " AND type='propal'";
+    $sql .= " AND entity=".(int) $conf->entity;
+    $resql = $this->db->query($sql);
+    
+    if ($resql && $this->db->num_rows($resql) == 0) { 
+            $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model";
+            $sql .= " (nom, entity, type, libelle)"; 
+            $sql .= " VALUES ('cyanqualirepar', " .(int) $conf->entity .", 'propal', 'Cyan QualiRépar')";
+            $this->db->query($sql); 
+    }
+    
+
 
     return $this->_init(array(), $options);
 }
