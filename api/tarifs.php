@@ -1,108 +1,76 @@
 <?php
 /**
- * Gestion de la fiche tarifaire QualiRépar
+ * API publique des tarifs QualiRépar
+ *
+ * Retourne uniquement les tarifs sélectionnés
+ * pour la fiche tarifaire publique.
  */
 
-class QualiReparTarifs
-{
-    /**
-     * @var DoliDB
-     */
-    private $db;
+// Charger Dolibarr
+$res = 0;
 
-    /**
-     * Constructeur
-     *
-     * @param DoliDB $db
-     */
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
-
-    /**
-     * Récupère les produits à afficher dans la fiche tarifaire.
-     *
-     * @return array
-     */
-    public function getTarifs()
-    {
-        $tarifs = array();
-
-        $sql = "SELECT";
-        $sql .= " p.rowid,";
-        $sql .= " p.ref,";
-        $sql .= " p.label,";
-        $sql .= " p.description,";
-        $sql .= " p.price,";
-        $sql .= " p.price_ttc,";
-        $sql .= " p.tva_tx,";
-        $sql .= " p.tms,";
-        $sql .= " e.afficher_site_tarif,";
-        $sql .= " e.ordre_site_tarif";
-        $sql .= " FROM ".MAIN_DB_PREFIX."product AS p";
-        $sql .= " INNER JOIN ".MAIN_DB_PREFIX."product_extrafields AS e";
-        $sql .= " ON e.fk_object = p.rowid";
-        $sql .= " WHERE p.tosell = 1";
-        $sql .= " AND e.afficher_site_tarif = 1";
-        $sql .= " ORDER BY";
-        $sql .= " e.ordre_site_tarif ASC,";
-        $sql .= " p.label ASC";
-
-        $resql = $this->db->query($sql);
-
-        if (!$resql) {
-            return $tarifs;
-        }
-
-        while ($obj = $this->db->fetch_object($resql)) {
-
-            $tarifs[] = array(
-                'id' => (int) $obj->rowid,
-                'ref' => $obj->ref,
-                'label' => $obj->label,
-                'description' => $obj->description,
-                'price' => (float) $obj->price,
-                'price_ttc' => (float) $obj->price_ttc,
-                'tva_tx' => (float) $obj->tva_tx,
-                'tms' => $obj->tms,
-                'ordre' => (int) $obj->ordre_site_tarif
-            );
-        }
-
-        return $tarifs;
-    }
-
-    /**
-     * Retourne la date de dernière modification
-     * des produits présents dans la fiche tarifaire.
-     *
-     * @return string|null Date au format YYYY-MM-DD
-     */
-    public function getDateMiseAJour()
-    {
-        $sql = "SELECT MAX(p.tms) as derniere_modification";
-        $sql .= " FROM ".MAIN_DB_PREFIX."product AS p";
-        $sql .= " INNER JOIN ".MAIN_DB_PREFIX."product_extrafields AS e";
-        $sql .= " ON e.fk_object = p.rowid";
-        $sql .= " WHERE p.tosell = 1";
-        $sql .= " AND e.afficher_site_tarif = 1";
-
-        $resql = $this->db->query($sql);
-
-        if (!$resql) {
-            return null;
-        }
-
-        $obj = $this->db->fetch_object($resql);
-
-        if (empty($obj->derniere_modification)) {
-            return null;
-        }
-
-        return date(
-            'Y-m-d',
-            strtotime($obj->derniere_modification)
-        );
-    }
+if (!$res && file_exists("../../../main.inc.php")) {
+    $res = @include "../../../main.inc.php";
 }
+
+if (!$res) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+
+    echo json_encode(array(
+        'success' => false,
+        'error' => 'Impossible de charger Dolibarr.'
+    ));
+
+    exit;
+}
+
+// Charger la classe de récupération des tarifs
+require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
+
+// Autoriser uniquement les requêtes GET
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+
+    http_response_code(405);
+    header('Content-Type: application/json; charset=utf-8');
+
+    echo json_encode(array(
+        'success' => false,
+        'error' => 'Méthode non autorisée.'
+    ));
+
+    exit;
+}
+
+// Récupération des tarifs
+$tarifsObj = new QualiReparTarifs($db);
+$tarifs = $tarifsObj->getTarifs();
+
+// Récupération de la date réelle de dernière modification
+$dateMiseAJour = $tarifsObj->getDateMiseAJour();
+
+// Construire une réponse publique minimale
+$result = array();
+
+foreach ($tarifs as $tarif) {
+
+    $result[] = array(
+        'nom' => $tarif['label'],
+        'prix_ttc' => $tarif['price_ttc'],
+        'ordre' => $tarif['ordre']
+    );
+}
+
+// Réponse JSON
+header('Content-Type: application/json; charset=utf-8');
+
+echo json_encode(
+    array(
+        'success' => true,
+        'updated_at' => $dateMiseAJour,
+        'tarifs' => $result
+    ),
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+);
+
+exit;
