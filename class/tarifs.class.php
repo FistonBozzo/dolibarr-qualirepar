@@ -3,8 +3,6 @@
  * Gestion de la fiche tarifaire QualiRépar
  */
 
-require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
-
 class QualiReparTarifs
 {
     /**
@@ -25,14 +23,6 @@ class QualiReparTarifs
     /**
      * Récupère les produits à afficher dans la fiche tarifaire.
      *
-     * Conditions :
-     * - produit actif
-     * - extrafield afficher_site_tarif = 1
-     *
-     * Tri :
-     * - ordre_site_tarif
-     * - nom du produit
-     *
      * @return array
      */
     public function getTarifs()
@@ -47,14 +37,12 @@ class QualiReparTarifs
         $sql .= " p.price,";
         $sql .= " p.price_ttc,";
         $sql .= " p.tva_tx,";
-        $sql .= " p.entity,";
         $sql .= " e.afficher_site_tarif,";
         $sql .= " e.ordre_site_tarif";
         $sql .= " FROM ".MAIN_DB_PREFIX."product AS p";
-        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_extrafields AS e";
+        $sql .= " INNER JOIN ".MAIN_DB_PREFIX."product_extrafields AS e";
         $sql .= " ON e.fk_object = p.rowid";
-        $sql .= " WHERE p.entity IN (0, ".((int) $this->db->escape($this->db->id)).")";
-        $sql .= " AND p.tosell = 1";
+        $sql .= " WHERE p.tosell = 1";
         $sql .= " AND e.afficher_site_tarif = 1";
         $sql .= " ORDER BY";
         $sql .= " e.ordre_site_tarif ASC,";
