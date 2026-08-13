@@ -223,29 +223,28 @@ h1 {
 
     <div class="actions">
 
-        <a
-            class="action tel"
-            href="tel:TON_NUMERO"
-        >
-            Appeler
-        </a>
+    <a
+        class="action tel"
+        href="tel:+33759736080"
+    >
+        Appeler
+    </a>
 
-        <a
-            class="action sms"
-            href="sms:TON_NUMERO"
-        >
-            SMS
-        </a>
+    <a
+        class="action sms"
+        href="sms:+33759736080"
+    >
+        SMS
+    </a>
 
-        <a
-            class="action whatsapp"
-            href="https://wa.me/TON_NUMERO"
-        >
-            WhatsApp
-        </a>
+    <a
+        class="action whatsapp"
+        href="https://wa.me/33759736080"
+    >
+        WhatsApp
+    </a>
 
-    </div>
-
+</div>
 
     <div class="footer">
 
