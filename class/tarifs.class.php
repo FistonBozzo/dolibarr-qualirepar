@@ -37,6 +37,7 @@ class QualiReparTarifs
         $sql .= " p.price,";
         $sql .= " p.price_ttc,";
         $sql .= " p.tva_tx,";
+        $sql .= " p.tms,";
         $sql .= " e.afficher_site_tarif,";
         $sql .= " e.ordre_site_tarif";
         $sql .= " FROM ".MAIN_DB_PREFIX."product AS p";
@@ -64,10 +65,41 @@ class QualiReparTarifs
                 'price' => (float) $obj->price,
                 'price_ttc' => (float) $obj->price_ttc,
                 'tva_tx' => (float) $obj->tva_tx,
+                'tms' => $obj->tms,
                 'ordre' => (int) $obj->ordre_site_tarif
             );
         }
 
         return $tarifs;
+    }
+
+    /**
+     * Retourne la date de dernière modification
+     * des produits présents dans la fiche tarifaire.
+     *
+     * @return string|null
+     */
+    public function getDateMiseAJour()
+    {
+        $sql = "SELECT MAX(p.tms) as derniere_modification";
+        $sql .= " FROM ".MAIN_DB_PREFIX."product AS p";
+        $sql .= " INNER JOIN ".MAIN_DB_PREFIX."product_extrafields AS e";
+        $sql .= " ON e.fk_object = p.rowid";
+        $sql .= " WHERE p.tosell = 1";
+        $sql .= " AND e.afficher_site_tarif = 1";
+
+        $resql = $this->db->query($sql);
+
+        if (!$resql) {
+            return null;
+        }
+
+        $obj = $this->db->fetch_object($resql);
+
+        if (empty($obj->derniere_modification)) {
+            return null;
+        }
+
+        return $obj->derniere_modification;
     }
 }
