@@ -251,11 +251,7 @@ public function init($options = '')
     }
     
 
-
-    return $this->_init(array(), $options);
-
-
-    //Affichage tarif sur le site
+     //Affichage tarif sur le site
     // Extrafields produits - Tarifs publics
     $extrafields->addExtraField(
         'afficher_site_tarif',
@@ -292,6 +288,12 @@ public function init($options = '')
         '',
         ''
     );
+
+    
+   
+
+    return $this->_init(array(), $options);
+ 
 
 
     
