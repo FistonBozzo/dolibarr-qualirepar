@@ -6,6 +6,7 @@
 
 $apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
 
+
 /*
  * Récupération des tarifs via l'API publique
  */
@@ -39,11 +40,14 @@ if (!is_array($data) || empty($data['success'])) {
     die('Réponse API invalide.');
 }
 
+
 $tarifs = $data['tarifs'] ?? array();
+
 $dateMiseAJour = $data['updated_at'] ?? null;
 
 ?>
 <!DOCTYPE html>
+
 <html lang="fr">
 
 <head>
@@ -54,11 +58,21 @@ $dateMiseAJour = $data['updated_at'] ?? null;
 
 <title>Tarifs Electrojul</title>
 
+
 <style>
+
+/* =========================================
+   RESET
+   ========================================= */
 
 * {
     box-sizing: border-box;
 }
+
+
+/* =========================================
+   PAGE
+   ========================================= */
 
 html,
 body {
@@ -67,24 +81,51 @@ body {
     width: 100%;
 }
 
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     background: transparent;
+
     color: #222;
+
 }
+
+
+/* =========================================
+   CONTENEUR TARIFS
+   ========================================= */
 
 .tarifs {
+
     width: 100%;
+
     max-width: 700px;
+
     margin: 0 auto;
+
 }
 
+
+/* =========================================
+   LIGNE TARIF
+   ========================================= */
+
 .tarif {
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     gap: 20px;
+
+    width: 100%;
 
     padding: 16px 18px;
 
@@ -96,41 +137,130 @@ body {
 
     border-radius: 10px;
 
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.06);
+
 }
+
+
+/* =========================================
+   NOM DU TARIF
+   ========================================= */
 
 .nom {
+
     font-size: 16px;
+
     line-height: 1.35;
+
     font-weight: 600;
+
 }
+
+
+/* =========================================
+   PRIX
+   ========================================= */
 
 .prix {
+
     white-space: nowrap;
+
     font-size: 19px;
+
     font-weight: 700;
+
 }
 
-.date {
-    margin-top: 15px;
+
+/* =========================================
+   MENTION
+   ========================================= */
+
+.mentions-tarifs {
+
+    margin-top: 18px;
+
+    padding: 0 10px;
+
     text-align: center;
+
     font-size: 12px;
-    color: #777;
+
+    line-height: 1.5;
+
+    color: #666;
+
 }
+
+
+/* =========================================
+   TRAIT DE SÉPARATION
+   ========================================= */
+
+.separateur {
+
+    width: 80%;
+
+    max-width: 500px;
+
+    height: 1px;
+
+    margin: 12px auto;
+
+    background: #e5e5e5;
+
+}
+
+
+/* =========================================
+   DATE DE MISE À JOUR
+   ========================================= */
+
+.date {
+
+    text-align: center;
+
+    font-size: 12px;
+
+    color: #777;
+
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
 
 @media (max-width: 500px) {
 
     .tarif {
+
         padding: 14px;
+
         gap: 12px;
+
     }
+
 
     .nom {
+
         font-size: 15px;
+
     }
 
+
     .prix {
+
         font-size: 18px;
+
+    }
+
+
+    .mentions-tarifs {
+
+        font-size: 12px;
+
     }
 
 }
@@ -139,38 +269,20 @@ body {
 
 </head>
 
+
 <body>
+
 
 <div class="tarifs">
 
-<?php foreach ($tarifs as $tarif) { ?>
+
+<?php if (empty($tarifs)) { ?>
 
     <div class="tarif">
 
         <div class="nom">
 
-            <?php
-            echo htmlspecialchars(
-                $tarif['nom'],
-                ENT_QUOTES,
-                'UTF-8'
-            );
-            ?>
-
-        </div>
-
-        <div class="prix">
-
-            <?php
-            echo number_format(
-                (float) $tarif['prix_ttc'],
-                2,
-                ',',
-                ' '
-            );
-            ?>
-
-            € TTC
+            Aucun tarif disponible.
 
         </div>
 
@@ -178,14 +290,87 @@ body {
 
 <?php } ?>
 
+
+<?php foreach ($tarifs as $tarif) { ?>
+
+    <div class="tarif">
+
+
+        <div class="nom">
+
+            <?php
+
+            echo htmlspecialchars(
+
+                $tarif['nom'],
+
+                ENT_QUOTES,
+
+                'UTF-8'
+
+            );
+
+            ?>
+
+        </div>
+
+
+        <div class="prix">
+
+            <?php
+
+            echo number_format(
+
+                (float) $tarif['prix_ttc'],
+
+                2,
+
+                ',',
+
+                ' '
+
+            );
+
+            ?>
+
+            € TTC
+
+        </div>
+
+
+    </div>
+
+<?php } ?>
+
+
+<!-- =====================================
+     MENTION TARIFAIRE
+     ===================================== -->
+
 <div class="mentions-tarifs">
 
-    <strong>Le forfait est dû lors d'une réparation réussie.</strong><br>
-    Les pièces sont garanties 3 mois dans le cadre d'une utilisation normale.
+    <strong>
+        Le forfait est dû lors d'une réparation réussie.
+    </strong>
+
+    <br>
+
+    Les pièces sont garanties 3 mois
+    dans le cadre d'une utilisation normale.
 
 </div>
 
+
+<!-- =====================================
+     SÉPARATEUR
+     ===================================== -->
+
 <div class="separateur"></div>
+
+
+<!-- =====================================
+     DATE DE MISE À JOUR
+     ===================================== -->
 
 <?php if ($dateMiseAJour) { ?>
 
@@ -194,14 +379,23 @@ body {
         Tarifs mis à jour le
 
         <?php
+
         echo date(
+
             'd/m/Y',
+
             strtotime($dateMiseAJour)
+
         );
+
         ?>
 
     </div>
 
+<?php } ?>
+
+
+</div>
 
 
 </body>
