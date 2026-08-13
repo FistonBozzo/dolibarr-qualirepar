@@ -4,11 +4,32 @@
  * Version intégration Google Sites
  */
 
-$apiUrl = '../../api/tarifs.php';
+$apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
 
-$json = @file_get_contents($apiUrl);
+/*
+ * Récupération des tarifs via l'API publique
+ */
 
-if ($json === false) {
+$ch = curl_init($apiUrl);
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+$json = curl_exec($ch);
+
+$curlError = curl_error($ch);
+
+curl_close($ch);
+
+
+/*
+ * Vérification de la réponse
+ */
+
+if ($json === false || empty($json)) {
     http_response_code(500);
     die('Impossible de récupérer les tarifs.');
 }
@@ -20,7 +41,7 @@ if (
     || empty($data['success'])
 ) {
     http_response_code(500);
-    die('Impossible de récupérer les tarifs.');
+    die('Réponse API invalide.');
 }
 
 $tarifs = $data['tarifs'] ?? array();
@@ -41,6 +62,10 @@ $dateMiseAJour = $data['updated_at'] ?? null;
 
 <style>
 
+/* =========================
+   RESET
+   ========================= */
+
 * {
     box-sizing: border-box;
 }
@@ -52,17 +77,38 @@ body {
     width: 100%;
 }
 
+
+/* =========================
+   PAGE
+   ========================= */
+
 body {
     font-family: Arial, Helvetica, sans-serif;
+
     background: transparent;
+
     color: #222;
 }
 
+
+/* =========================
+   CONTENEUR
+   ========================= */
+
 .tarifs {
+
     width: 100%;
+
     max-width: 700px;
+
     margin: 0 auto;
+
 }
+
+
+/* =========================
+   TARIF
+   ========================= */
 
 .tarif {
 
@@ -74,6 +120,8 @@ body {
 
     gap: 20px;
 
+    width: 100%;
+
     padding: 16px 18px;
 
     margin-bottom: 10px;
@@ -84,8 +132,15 @@ body {
 
     border-radius: 10px;
 
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.06);
+
 }
+
+
+/* =========================
+   NOM
+   ========================= */
 
 .nom {
 
@@ -94,7 +149,13 @@ body {
     line-height: 1.35;
 
     font-weight: 600;
+
 }
+
+
+/* =========================
+   PRIX
+   ========================= */
 
 .prix {
 
@@ -103,7 +164,13 @@ body {
     font-size: 19px;
 
     font-weight: 700;
+
 }
+
+
+/* =========================
+   DATE
+   ========================= */
 
 .date {
 
@@ -114,7 +181,13 @@ body {
     font-size: 12px;
 
     color: #777;
+
 }
+
+
+/* =========================
+   MOBILE
+   ========================= */
 
 @media (max-width: 500px) {
 
@@ -123,16 +196,19 @@ body {
         padding: 14px;
 
         gap: 12px;
+
     }
 
     .nom {
 
         font-size: 15px;
+
     }
 
     .prix {
 
         font-size: 18px;
+
     }
 
 }
@@ -141,9 +217,27 @@ body {
 
 </head>
 
+
 <body>
 
+
 <div class="tarifs">
+
+
+<?php if (empty($tarifs)) { ?>
+
+    <div class="tarif">
+
+        <div class="nom">
+
+            Aucun tarif disponible.
+
+        </div>
+
+    </div>
+
+<?php } ?>
+
 
 <?php foreach ($tarifs as $tarif) { ?>
 
@@ -152,24 +246,38 @@ body {
         <div class="nom">
 
             <?php
+
             echo htmlspecialchars(
+
                 $tarif['nom'],
+
                 ENT_QUOTES,
+
                 'UTF-8'
+
             );
+
             ?>
 
         </div>
 
+
         <div class="prix">
 
             <?php
+
             echo number_format(
+
                 (float) $tarif['prix_ttc'],
+
                 2,
+
                 ',',
+
                 ' '
+
             );
+
             ?>
 
             € TTC
@@ -186,18 +294,26 @@ body {
     <div class="date">
 
         Tarifs mis à jour le
+
         <?php
+
         echo date(
+
             'd/m/Y',
+
             strtotime($dateMiseAJour)
+
         );
+
         ?>
 
     </div>
 
 <?php } ?>
 
+
 </div>
+
 
 </body>
 
