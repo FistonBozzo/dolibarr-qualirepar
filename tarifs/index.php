@@ -3,24 +3,27 @@
  * Fiche tarifaire publique QualiRépar
  */
 
-$res = 0;
+$apiUrl = '../../api/tarifs.php';
 
-if (!$res && file_exists("../../../main.inc.php")) {
-    $res = @include "../../../main.inc.php";
-}
+$json = @file_get_contents($apiUrl);
 
-if (!$res) {
+if ($json === false) {
     http_response_code(500);
-    die('Impossible de charger Dolibarr.');
+    die('Impossible de récupérer les tarifs.');
 }
 
-require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
+$data = json_decode($json, true);
 
-$tarifsObj = new QualiReparTarifs($db);
+if (
+    !is_array($data)
+    || empty($data['success'])
+) {
+    http_response_code(500);
+    die('Impossible de récupérer les tarifs.');
+}
 
-$tarifs = $tarifsObj->getTarifs();
-
-$dateMiseAJour = $tarifsObj->getDateMiseAJour();
+$tarifs = $data['tarifs'] ?? array();
+$dateMiseAJour = $data['updated_at'] ?? null;
 
 ?>
 <!DOCTYPE html>
@@ -59,14 +62,8 @@ body {
     margin-bottom: 25px;
 }
 
-.logo {
-    max-width: 220px;
-    max-height: 100px;
-    margin-bottom: 10px;
-}
-
 h1 {
-    margin: 5px 0;
+    margin: 5px 0 8px;
     font-size: 28px;
 }
 
@@ -80,6 +77,7 @@ h1 {
     border-radius: 12px;
     padding: 18px;
     margin-bottom: 12px;
+
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 
     display: flex;
@@ -102,16 +100,22 @@ h1 {
 
 .actions {
     margin-top: 25px;
+
     display: flex;
     gap: 10px;
 }
 
 .action {
     flex: 1;
+
     text-align: center;
+
     padding: 14px;
+
     border-radius: 10px;
+
     text-decoration: none;
+
     font-weight: bold;
 }
 
@@ -132,8 +136,11 @@ h1 {
 
 .footer {
     text-align: center;
+
     margin-top: 25px;
+
     font-size: 13px;
+
     color: #777;
 }
 
@@ -171,11 +178,6 @@ h1 {
 
     <div class="header">
 
-        <!--
-        Remplace cette ligne par ton logo
-        lorsque nous aurons son emplacement.
-        -->
-
         <h1>Mes tarifs</h1>
 
         <?php if ($dateMiseAJour) { ?>
@@ -183,10 +185,12 @@ h1 {
             <div class="update">
 
                 Tarifs mis à jour le
-                <?php echo dol_print_date(
-                    dol_stringtotime($dateMiseAJour),
-                    '%d/%m/%Y'
-                ); ?>
+                <?php
+                echo date(
+                    'd/m/Y',
+                    strtotime($dateMiseAJour)
+                );
+                ?>
 
             </div>
 
@@ -202,7 +206,11 @@ h1 {
             <div class="tarif-nom">
 
                 <?php
-                echo dol_escape_htmltag($tarif['label']);
+                echo htmlspecialchars(
+                    $tarif['nom'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
                 ?>
 
             </div>
@@ -210,8 +218,14 @@ h1 {
             <div class="tarif-prix">
 
                 <?php
-                echo price($tarif['price_ttc']);
+                echo number_format(
+                    (float) $tarif['prix_ttc'],
+                    2,
+                    ',',
+                    ' '
+                );
                 ?>
+
                 € TTC
 
             </div>
@@ -223,28 +237,29 @@ h1 {
 
     <div class="actions">
 
-    <a
-        class="action tel"
-        href="tel:+33759736080"
-    >
-        Appeler
-    </a>
+        <a
+            class="action tel"
+            href="tel:+33759736080"
+        >
+            📞 Appeler
+        </a>
 
-    <a
-        class="action sms"
-        href="sms:+33759736080"
-    >
-        SMS
-    </a>
+        <a
+            class="action sms"
+            href="sms:+33759736080"
+        >
+            💬 SMS
+        </a>
 
-    <a
-        class="action whatsapp"
-        href="https://wa.me/33759736080"
-    >
-        WhatsApp
-    </a>
+        <a
+            class="action whatsapp"
+            href="https://wa.me/33759736080"
+        >
+            WhatsApp
+        </a>
 
-</div>
+    </div>
+
 
     <div class="footer">
 
