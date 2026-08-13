@@ -1,16 +1,13 @@
 <?php
 /**
  * API publique des tarifs QualiRépar
- *
- * Retourne uniquement les produits sélectionnés
- * pour la fiche tarifaire publique.
  */
 
 // Charger Dolibarr
 $res = 0;
 
-if (!$res && file_exists("../../main.inc.php")) {
-    $res = @include "../../main.inc.php";
+if (!$res && file_exists("../../../main.inc.php")) {
+    $res = @include "../../../main.inc.php";
 }
 
 if (!$res) {
