@@ -194,6 +194,11 @@ body {
     </div>
 
 <?php } ?>
+    
+<div class="mentions-tarifs">
+    <strong>Le forfait est dû lors d'une réparation réussie.</strong><br>
+    Les pièces sont garanties 3 mois dans le cadre d'une utilisation normale.
+</div>
 
 </div>
 
