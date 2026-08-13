@@ -2,75 +2,90 @@
 /**
  * API publique des tarifs QualiRépar
  *
- * Retourne uniquement les tarifs sélectionnés
- * pour la fiche tarifaire publique.
+ * Cette API est volontairement accessible sans connexion Dolibarr.
+ * Elle permet uniquement de consulter les tarifs publics.
  */
 
-// Charger Dolibarr
-$res = 0;
 
-if (!$res && file_exists("../../../main.inc.php")) {
-    $res = @include "../../../main.inc.php";
-}
+/*
+ * Autoriser l'accès sans authentification Dolibarr
+ */
 
-if (!$res) {
-    http_response_code(500);
-    header('Content-Type: application/json; charset=utf-8');
+define('NOLOGIN', 1);
+define('NOCSRFCHECK', 1);
+define('NOREQUIREUSER', 1);
+define('NOREQUIREMENU', 1);
+define('NOREQUIREHTML', 1);
 
-    echo json_encode(array(
-        'success' => false,
-        'error' => 'Impossible de charger Dolibarr.'
-    ));
 
-    exit;
-}
+/*
+ * Charger Dolibarr
+ */
 
-// Charger la classe de récupération des tarifs
+require_once dirname(__DIR__, 2).'/../main.inc.php';
+
+
+/*
+ * Charger la classe des tarifs
+ */
+
 require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
 
-// Autoriser uniquement les requêtes GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
-    http_response_code(405);
-    header('Content-Type: application/json; charset=utf-8');
+/*
+ * Réponse JSON
+ */
 
-    echo json_encode(array(
-        'success' => false,
-        'error' => 'Méthode non autorisée.'
-    ));
+header('Content-Type: application/json; charset=utf-8');
 
-    exit;
-}
+header('Cache-Control: public, max-age=300');
 
-// Récupération des tarifs
+
+/*
+ * Récupération des tarifs
+ */
+
 $tarifsObj = new QualiReparTarifs($db);
+
 $tarifs = $tarifsObj->getTarifs();
 
-// Récupération de la date réelle de dernière modification
 $dateMiseAJour = $tarifsObj->getDateMiseAJour();
 
-// Construire une réponse publique minimale
-$result = array();
+
+/*
+ * Préparation des données publiques
+ *
+ * On ne renvoie volontairement pas :
+ * - l'ID interne Dolibarr
+ * - la référence produit
+ * - la description
+ * - le prix HT
+ * - le taux de TVA
+ */
+
+$resultat = array();
 
 foreach ($tarifs as $tarif) {
 
-    $result[] = array(
+    $resultat[] = array(
         'nom' => $tarif['label'],
-        'prix_ttc' => $tarif['price_ttc'],
-        'ordre' => $tarif['ordre']
+        'prix_ttc' => (float) $tarif['price_ttc'],
+        'ordre' => (int) $tarif['ordre']
     );
 }
 
-// Réponse JSON
-header('Content-Type: application/json; charset=utf-8');
+
+/*
+ * Réponse
+ */
 
 echo json_encode(
     array(
         'success' => true,
         'updated_at' => $dateMiseAJour,
-        'tarifs' => $result
+        'tarifs' => $resultat
     ),
-    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    JSON_UNESCAPED_UNICODE |
+    JSON_UNESCAPED_SLASHES |
+    JSON_PRETTY_PRINT
 );
-
-exit;
