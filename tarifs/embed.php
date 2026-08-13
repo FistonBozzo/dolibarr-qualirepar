@@ -1,25 +1,30 @@
 <?php
 /**
- * Fiche tarifaire - intégration Google Sites
+ * Fiche tarifaire publique
+ * Version intégration Google Sites
  */
 
-$res = 0;
+$apiUrl = '../../api/tarifs.php';
 
-if (!$res && file_exists("../../../main.inc.php")) {
-    $res = @include "../../../main.inc.php";
-}
+$json = @file_get_contents($apiUrl);
 
-if (!$res) {
+if ($json === false) {
     http_response_code(500);
-    die('Impossible de charger Dolibarr.');
+    die('Impossible de récupérer les tarifs.');
 }
 
-require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
+$data = json_decode($json, true);
 
-$tarifsObj = new QualiReparTarifs($db);
+if (
+    !is_array($data)
+    || empty($data['success'])
+) {
+    http_response_code(500);
+    die('Impossible de récupérer les tarifs.');
+}
 
-$tarifs = $tarifsObj->getTarifs();
-$dateMiseAJour = $tarifsObj->getDateMiseAJour();
+$tarifs = $data['tarifs'] ?? array();
+$dateMiseAJour = $data['updated_at'] ?? null;
 
 ?>
 <!DOCTYPE html>
@@ -60,8 +65,11 @@ body {
 }
 
 .tarif {
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     gap: 20px;
@@ -80,12 +88,16 @@ body {
 }
 
 .nom {
+
     font-size: 16px;
+
     line-height: 1.35;
+
     font-weight: 600;
 }
 
 .prix {
+
     white-space: nowrap;
 
     font-size: 19px;
@@ -94,6 +106,7 @@ body {
 }
 
 .date {
+
     margin-top: 15px;
 
     text-align: center;
@@ -103,23 +116,22 @@ body {
     color: #777;
 }
 
-
-/*
- * Adaptation téléphone
- */
-
 @media (max-width: 500px) {
 
     .tarif {
+
         padding: 14px;
+
         gap: 12px;
     }
 
     .nom {
+
         font-size: 15px;
     }
 
     .prix {
+
         font-size: 18px;
     }
 
@@ -138,26 +150,48 @@ body {
     <div class="tarif">
 
         <div class="nom">
-            <?php echo dol_escape_htmltag($tarif['label']); ?>
+
+            <?php
+            echo htmlspecialchars(
+                $tarif['nom'],
+                ENT_QUOTES,
+                'UTF-8'
+            );
+            ?>
+
         </div>
 
         <div class="prix">
-            <?php echo price($tarif['price_ttc']); ?> € TTC
+
+            <?php
+            echo number_format(
+                (float) $tarif['prix_ttc'],
+                2,
+                ',',
+                ' '
+            );
+            ?>
+
+            € TTC
+
         </div>
 
     </div>
 
 <?php } ?>
 
+
 <?php if ($dateMiseAJour) { ?>
 
     <div class="date">
 
         Tarifs mis à jour le
-        <?php echo dol_print_date(
-            dol_stringtotime($dateMiseAJour),
-            '%d/%m/%Y'
-        ); ?>
+        <?php
+        echo date(
+            'd/m/Y',
+            strtotime($dateMiseAJour)
+        );
+        ?>
 
     </div>
 
