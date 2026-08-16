@@ -6,6 +6,26 @@
  * Elle permet uniquement de consulter les tarifs publics.
  */
 
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+$originsAutorisees = [
+    'https://electrojul69.gitlab.io'
+];
+
+if (in_array($origin, $originsAutorisees, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header("Vary: Origin");
+}
+
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Accept, Content-Type');
+header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 
 /*
  * Autoriser l'accès sans authentification Dolibarr
