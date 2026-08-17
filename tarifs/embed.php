@@ -358,7 +358,7 @@ body {
 
     <strong>
         Le forfait total est dû lors d'une réparation réussie.
-        Le déplacement restent dus dans tous les cas
+        Le déplacement reste dû dans tous les cas
     </strong>
 
     <br>
