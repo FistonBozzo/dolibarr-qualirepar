@@ -1,4 +1,3 @@
-```php
 <?php
 /**
  * Fiche tarifaire publique
@@ -358,7 +357,6 @@ body {
 <div class="mentions-tarifs">
 
     <strong>
-        Le déplacement est dû à la première intervention.
         Le montant total est dû lors d'une réparation réussie.
     </strong>
 
