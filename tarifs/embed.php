@@ -390,7 +390,7 @@ body {
 
         echo date(
 
-            'd/m/Y',
+            'd/m/Y à H:i',
 
             strtotime($dateMiseAJour)
 
