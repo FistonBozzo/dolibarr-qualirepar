@@ -2,6 +2,7 @@
 /**
  * Fiche tarifaire publique
  */
+date_default_timezone_set('Europe/Paris');
 
 $apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
 
@@ -388,11 +389,10 @@ body {
 
         <?php
 
-        echo date(
-
-            'd/m/Y',
-
+            echo date(
+            'd/m/Y à H:i',
             strtotime($dateMiseAJour)
+);
 
         );
 
