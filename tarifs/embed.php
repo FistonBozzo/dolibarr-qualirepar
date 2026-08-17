@@ -357,7 +357,8 @@ body {
 <div class="mentions-tarifs">
 
     <strong>
-        Le montant total est dû lors d'une réparation réussie.
+        Le forfait total est dû lors d'une réparation réussie.
+        Le déplacement restent dus dans tous les cas
     </strong>
 
     <br>
