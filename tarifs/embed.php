@@ -1,7 +1,7 @@
+```php
 <?php
 /**
  * Fiche tarifaire publique
- * Version intégration Google Sites
  */
 
 $apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
@@ -69,11 +69,6 @@ $dateMiseAJour = $data['updated_at'] ?? null;
     box-sizing: border-box;
 }
 
-
-/* =========================================
-   PAGE
-   ========================================= */
-
 html,
 body {
     margin: 0;
@@ -81,6 +76,10 @@ body {
     width: 100%;
 }
 
+
+/* =========================================
+   PAGE
+   ========================================= */
 
 body {
 
@@ -97,7 +96,7 @@ body {
 
 
 /* =========================================
-   CONTENEUR TARIFS
+   CONTENEUR
    ========================================= */
 
 .tarifs {
@@ -129,7 +128,7 @@ body {
 
     padding: 16px 18px;
 
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;
 
     background: #ffffff;
 
@@ -139,6 +138,17 @@ body {
 
     box-shadow:
         0 2px 6px rgba(0, 0, 0, 0.06);
+
+}
+
+
+/* =========================================
+   PREMIÈRE LIGNE
+   ========================================= */
+
+.tarif:first-child {
+
+    margin-top: 0;
 
 }
 
@@ -179,7 +189,7 @@ body {
 
 .mentions-tarifs {
 
-    margin-top: 18px;
+    margin-top: 8px;
 
     padding: 0 10px;
 
@@ -295,7 +305,6 @@ body {
 
     <div class="tarif">
 
-
         <div class="nom">
 
             <?php
@@ -336,7 +345,6 @@ body {
             € TTC
 
         </div>
-
 
     </div>
 
@@ -402,3 +410,4 @@ body {
 </body>
 
 </html>
+```
