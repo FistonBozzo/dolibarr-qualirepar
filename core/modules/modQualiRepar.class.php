@@ -328,6 +328,25 @@ $extrafields->addExtraField(
         '',
         ''
     );
+    
+    // Type d'appareil
+    $extrafields->addExtraField(
+    'type_appareil',
+    'Type d\'appareil',
+    'select',
+    99,
+    0,
+    $objecttype,
+    1,
+    0,
+    '',
+    'lave_linge:Lave-linge;seche_linge:Sèche-linge;lave_vaisselle:Lave-vaisselle;four:Four;refrigerateur:Réfrigérateur;congelateur:Congélateur;cuisiniere:Cuisinière;plaque_cuisson:Plaque de cuisson;autre:Autre',
+    0,
+    '',
+    '',
+    '',
+    ''
+);
 
     
    
