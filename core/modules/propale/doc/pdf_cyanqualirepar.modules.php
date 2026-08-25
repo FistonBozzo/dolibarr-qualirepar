@@ -372,6 +372,24 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				//********************
 				//Début Identification
 				//********************
+				// Récupération du libellé de l'extrafield Type d'appareil
+				$type_appareil = $object->array_options['options_type_appareil'] ?? '';
+				
+				$extrafields = new ExtraFields($this->db);
+				$extrafields->fetch_name_optionals_label($object->table_element);
+				
+				if (
+				    isset($extrafields->attributes[$object->table_element]['type_appareil']['param']['options'])
+				) {
+				    $options = $extrafields->attributes[$object->table_element]['type_appareil']['param']['options'];
+				
+				    if (isset($options[$type_appareil])) {
+				        $type_appareil = $options[$type_appareil];
+				    }
+				}
+
+
+
 				
 				// --------------------------------------------------
 				// Identification appareil
@@ -483,7 +501,7 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				$pdf->Cell(
 				    $colW - $labelW - 5,
 				    4,
-				    $object->array_options['options_type_appareil'] ?? ''
+				    $type_appareil
 				);
 				
 				
