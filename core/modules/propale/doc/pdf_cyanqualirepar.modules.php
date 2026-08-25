@@ -373,20 +373,15 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				//Début Identification
 				//********************
 				// Récupération du libellé de l'extrafield Type d'appareil
-				$type_appareil = $object->array_options['options_type_appareil'] ?? '';
-				
 				$extrafields = new ExtraFields($this->db);
 				$extrafields->fetch_name_optionals_label($object->table_element);
 				
-				if (
-				    isset($extrafields->attributes[$object->table_element]['type_appareil']['param']['options'])
-				) {
-				    $options = $extrafields->attributes[$object->table_element]['type_appareil']['param']['options'];
-				
-				    if (isset($options[$type_appareil])) {
-				        $type_appareil = $options[$type_appareil];
-				    }
-				}
+				$type_appareil = $extrafields->showOutputField(
+				    'type_appareil',
+				    $object->array_options['options_type_appareil'],
+				    '',
+				    $object->table_element
+				);
 
 
 
@@ -598,9 +593,7 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				
 				$pdf->SetFont('', '', 8);
 				
-				$budget_clean = (float) (
-				    $object->array_options['options_budget_max'] ?? 0
-				);
+				$budget_clean = (float) ($object->array_options['options_budget_max'] ?? 0);
 				
 				$budget_text = '';
 				
@@ -620,33 +613,6 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				    $colW - $labelW - 5,
 				    4,
 				    $budget_text
-				);
-
-				
-				$pdf->SetFont('', '', 8);
-				
-				$budget_clean = (float) (
-					$object->array_options['options_budget_max'] ?? 0
-				);
-				
-				$budget_text = '';
-				
-				if ($budget_clean > 0) {
-					$budget_text = price(
-						$budget_clean,
-						0,
-						$outputlangs,
-						1,
-						-1,
-						-1,
-						$conf->currency
-					);
-				}
-				
-				$pdf->Cell(
-					$colW - $labelW - 5,
-					4,
-					$budget_text
 				);
 				
 				// --------------------------------------------------
