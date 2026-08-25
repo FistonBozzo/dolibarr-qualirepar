@@ -1754,6 +1754,70 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 			}
 		}
 
+
+		// Bonus réparation QualiRépar
+		if (!empty($object->array_options['options_afficher_bonus_reparation'])
+		    && !empty($object->array_options['options_bonus_reparation'])) {
+		
+		    $index++;
+		
+		    $montant_bonus = $object->array_options['options_bonus_reparation'];
+		
+		    $pdf->SetTextColor(40, 40, 40);
+		    $pdf->SetFillColor(255, 255, 255);
+		
+		    $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+		    $pdf->MultiCell(
+		        $col2x - $col1x,
+		        $tab2_hl,
+		        'Bonus réparation',
+		        $useborder,
+		        'L',
+		        true
+		    );
+		
+		    $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+		    $pdf->MultiCell(
+		        $largcol2,
+		        $tab2_hl,
+		        '-'.price($montant_bonus, 0, $outputlangs),
+		        $useborder,
+		        'R',
+		        true
+		    );
+		
+		    // Total TTC à régler après bonus
+		    $index++;
+		
+		    $total_a_regler = $total_ttc - $montant_bonus;
+		
+		    $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+		    $pdf->MultiCell(
+		        $col2x - $col1x,
+		        $tab2_hl,
+		        'Total TTC à régler',
+		        $useborder,
+		        'L',
+		        true
+		    );
+		
+		    $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+		    $pdf->MultiCell(
+		        $largcol2,
+		        $tab2_hl,
+		        price($total_a_regler, 0, $outputlangs),
+		        $useborder,
+		        'R',
+		        true
+		    );
+		}
+
+		
+
+
+
+		
+
 		$pdf->SetTextColor(0, 0, 0);
 
 		$resteapayer = 0;
