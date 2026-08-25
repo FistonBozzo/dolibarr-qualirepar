@@ -210,6 +210,46 @@ public function init($options = '')
         ''
     );
 
+    /*
+ * Extrafields spécifiques aux devis - QualiRépar
+ */
+
+$extrafields->addExtraField(
+    'bonus_reparation',
+    'Bonus réparation QualiRépar',
+    'price',
+    202,
+    '',
+    'propal',
+    1,
+    1,
+    '',
+    '',
+    0,
+    '',
+    '',
+    '',
+    ''
+);
+
+$extrafields->addExtraField(
+    'afficher_bonus_reparation',
+    'Afficher bonus',
+    'boolean',
+    203,
+    '',
+    'propal',
+    1,
+    1,
+    '',
+    '',
+    0,
+    '',
+    '',
+    '',
+    ''
+);
+
 
     /*
      * Création du modèle PDF intervention QualiRépar
