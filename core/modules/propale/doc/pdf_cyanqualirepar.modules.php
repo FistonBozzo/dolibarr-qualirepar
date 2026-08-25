@@ -383,7 +383,7 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				$boxW = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 				
 				$rowH = 6;
-				$boxH = $rowH * 2;
+				$boxH = $rowH * 3;
 				$colW = $boxW / 2;
 				$labelW = 35;
 				
@@ -428,112 +428,182 @@ class pdf_cyanqualirepar extends ModelePDFPropales
 				
 				$pdf->SetDrawColor(128, 128, 128);
 				
+				// Cadre extérieur
 				$pdf->Rect(
-					$boxX,
-					$boxY,
-					$boxW,
-					$boxH
+				    $boxX,
+				    $boxY,
+				    $boxW,
+				    $boxH
+				);
+				
+				// Lignes horizontales
+				$pdf->Line(
+				    $boxX,
+				    $boxY + $rowH,
+				    $boxX + $boxW,
+				    $boxY + $rowH
 				);
 				
 				$pdf->Line(
-					$boxX,
-					$boxY + $rowH,
-					$boxX + $boxW,
-					$boxY + $rowH
+				    $boxX,
+				    $boxY + ($rowH * 2),
+				    $boxX + $boxW,
+				    $boxY + ($rowH * 2)
 				);
 				
+				// Ligne verticale centrale
 				$pdf->Line(
-					$boxX + $colW,
-					$boxY,
-					$boxX + $colW,
-					$boxY + $boxH
+				    $boxX + $colW,
+				    $boxY,
+				    $boxX + $colW,
+				    $boxY + $boxH
 				);
 				
+				
 				// --------------------------------------------------
-				// Ligne 1 : Marque / Modèle
+				// Ligne 1 : Type d'appareil / Marque
 				// --------------------------------------------------
 				
+				// Type d'appareil
 				$pdf->SetFont('', 'B', 8);
 				
 				$pdf->SetXY(
-					$boxX + 3,
-					$boxY + 1
+				    $boxX + 3,
+				    $boxY + 1
 				);
 				
 				$pdf->Cell(
-					$labelW,
-					4,
-					'Marque :'
+				    $labelW,
+				    4,
+				    'Type appareil :'
 				);
 				
 				$pdf->SetFont('', '', 8);
 				
 				$pdf->Cell(
-					$colW - $labelW - 5,
-					4,
-					$object->array_options['options_marque'] ?? ''
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_type_appareil'] ?? ''
 				);
+				
+				
+				// Marque
+				$pdf->SetFont('', 'B', 8);
+				
+				$pdf->SetXY(
+				    $boxX + $colW + 3,
+				    $boxY + 1
+				);
+				
+				$pdf->Cell(
+				    $labelW,
+				    4,
+				    'Marque :'
+				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_marque'] ?? ''
+				);
+				
+				
+				// --------------------------------------------------
+				// Ligne 2 : Modèle / N° série
+				// --------------------------------------------------
 				
 				// Modèle
 				$pdf->SetFont('', 'B', 8);
 				
 				$pdf->SetXY(
-					$boxX + $colW + 3,
-					$boxY + 1
+				    $boxX + 3,
+				    $boxY + $rowH + 1
 				);
 				
 				$pdf->Cell(
-					$labelW,
-					4,
-					'Modèle :'
+				    $labelW,
+				    4,
+				    'Modèle :'
 				);
 				
 				$pdf->SetFont('', '', 8);
 				
 				$pdf->Cell(
-					$colW - $labelW - 5,
-					4,
-					$object->array_options['options_modele'] ?? ''
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_modele'] ?? ''
 				);
 				
-				// --------------------------------------------------
-				// Ligne 2 : N° série / Budget maximum
-				// --------------------------------------------------
 				
+				// N° série
 				$pdf->SetFont('', 'B', 8);
 				
 				$pdf->SetXY(
-					$boxX + 3,
-					$boxY + $rowH + 1
+				    $boxX + $colW + 3,
+				    $boxY + $rowH + 1
 				);
 				
 				$pdf->Cell(
-					$labelW,
-					4,
-					'N° série :'
+				    $labelW,
+				    4,
+				    'N° série :'
 				);
 				
 				$pdf->SetFont('', '', 8);
 				
 				$pdf->Cell(
-					$colW - $labelW - 5,
-					4,
-					$object->array_options['options_serial'] ?? ''
+				    $colW - $labelW - 5,
+				    4,
+				    $object->array_options['options_serial'] ?? ''
 				);
+				
+				
+				// --------------------------------------------------
+				// Ligne 3 : Budget maximum
+				// --------------------------------------------------
 				
 				// Budget maximum
 				$pdf->SetFont('', 'B', 8);
 				
 				$pdf->SetXY(
-					$boxX + $colW + 3,
-					$boxY + $rowH + 1
+				    $boxX + 3,
+				    $boxY + ($rowH * 2) + 1
 				);
 				
 				$pdf->Cell(
-					$labelW,
-					4,
-					'Budget max :'
+				    $labelW,
+				    4,
+				    'Budget max :'
 				);
+				
+				$pdf->SetFont('', '', 8);
+				
+				$budget_clean = (float) (
+				    $object->array_options['options_budget_max'] ?? 0
+				);
+				
+				$budget_text = '';
+				
+				if ($budget_clean > 0) {
+				    $budget_text = price(
+				        $budget_clean,
+				        0,
+				        $outputlangs,
+				        1,
+				        -1,
+				        -1,
+				        $conf->currency
+				    );
+				}
+				
+				$pdf->Cell(
+				    $colW - $labelW - 5,
+				    4,
+				    $budget_text
+				);
+
 				
 				$pdf->SetFont('', '', 8);
 				
