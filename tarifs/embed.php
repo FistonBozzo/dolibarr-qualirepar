@@ -8,14 +8,6 @@
  * enregistrés dans Dolibarr.
  */
 
-$apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
-
-
-/*
- * Récupération des tarifs via l'API publique
- */
-
-$ch = curl_init($apiUrl);
 
 /*
  * -------------------------------------------------------------
