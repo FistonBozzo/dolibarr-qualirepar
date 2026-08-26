@@ -1,20 +1,20 @@
 <?php
 /**
- * Fiche tarifaire PDF publique Electrojul
+ * Fiche tarifaire publique Electrojul
  *
- * Accessible sans connexion Dolibarr.
+ * Génère un PDF public à partir des tarifs QualiRépar.
  *
  * URL :
  * https://electrojul.duckdns.org/custom/qualirepar/tarifs/tarifs-pdf.php
  */
 
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);
 
 /*
- * Accès public
+ * ==========================================================
+ * 1. ACCÈS PUBLIC
+ * ==========================================================
  */
+
 define('NOLOGIN', 1);
 define('NOCSRFCHECK', 1);
 define('NOREQUIREUSER', 1);
@@ -23,41 +23,29 @@ define('NOREQUIREHTML', 1);
 
 
 /*
- * Fuseau horaire
+ * ==========================================================
+ * 2. CHARGEMENT DE DOLIBARR
+ * ==========================================================
  */
-date_default_timezone_set('Europe/Paris');
 
-
-/*
- * Charger Dolibarr
- */
 require_once dirname(__DIR__, 2).'/../main.inc.php';
 
 
 /*
- * Charger les fonctions PDF Dolibarr
+ * ==========================================================
+ * 3. CHARGEMENT DE LA CLASSE DES TARIFS
+ * ==========================================================
  */
-require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
-
-/*
- * Charger la classe des tarifs QualiRépar
- */
 require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
 
 
 /*
- * Vérification de la fonction PDF
+ * ==========================================================
+ * 4. RÉCUPÉRATION DES TARIFS
+ * ==========================================================
  */
-if (!function_exists('pdf_getInstance')) {
-    http_response_code(500);
-    exit('Impossible de charger le moteur PDF.');
-}
 
-
-/*
- * Récupération des tarifs
- */
 $tarifsObj = new QualiReparTarifs($db);
 
 $tarifs = $tarifsObj->getTarifs();
@@ -66,250 +54,736 @@ $dateMiseAJour = $tarifsObj->getDateMiseAJour();
 
 
 /*
- * Création du PDF
+ * ==========================================================
+ * 5. CHARGEMENT DES CLASSES PDF
+ * ==========================================================
  */
-$pdf = pdf_getInstance('A4');
 
-if (!$pdf) {
+require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
+
+
+/*
+ * TCPDF est normalement chargé par Dolibarr.
+ * Vérification avant utilisation.
+ */
+
+if (!class_exists('TCPDF')) {
     http_response_code(500);
-    exit('Impossible de créer le PDF.');
+    die('Erreur : la classe TCPDF n\'est pas disponible.');
 }
 
 
 /*
- * Configuration du document
+ * ==========================================================
+ * 6. INITIALISATION
+ * ==========================================================
  */
-$pdf->SetCreator('Electrojul');
-$pdf->SetAuthor('Electrojul');
-$pdf->SetTitle('Tarifs Electrojul');
-$pdf->SetSubject('Tarifs des prestations Electrojul');
 
-$pdf->SetMargins(18, 18, 18);
-$pdf->SetAutoPageBreak(true, 18);
+date_default_timezone_set('Europe/Paris');
+
+$langs->loadLangs(array('main', 'companies'));
+
+
+/*
+ * ==========================================================
+ * 7. CRÉATION DU PDF
+ * ==========================================================
+ */
+
+$pdf = new TCPDF(
+    'P',
+    'mm',
+    'A4',
+    true,
+    'UTF-8',
+    false
+);
+
+
+/*
+ * Informations du document
+ */
+
+$pdf->SetCreator('Dolibarr');
+$pdf->SetAuthor(
+    !empty($conf->global->MAIN_INFO_SOCIETE_NOM)
+        ? $conf->global->MAIN_INFO_SOCIETE_NOM
+        : 'Electrojul'
+);
+$pdf->SetTitle('Tarifs Electrojul');
+$pdf->SetSubject('Fiche tarifaire');
+$pdf->SetKeywords('Electrojul, tarifs, réparation, électroménager');
+
+
+/*
+ * ==========================================================
+ * 8. CONFIGURATION DE LA PAGE
+ * ==========================================================
+ */
+
+$pdf->SetMargins(15, 15, 15);
+
+$pdf->SetHeaderMargin(0);
+$pdf->SetFooterMargin(10);
+
+$pdf->SetAutoPageBreak(true, 20);
+
+$pdf->SetPrintHeader(false);
+$pdf->SetPrintFooter(false);
 
 $pdf->AddPage();
 
 
 /*
- * Police
+ * ==========================================================
+ * 9. COULEURS
+ * ==========================================================
  */
-$font = pdf_getPDFFont($langs);
 
-$pdf->SetFont($font, 'B', 22);
+$bleu = array(0, 0, 60);
+$gris = array(100, 100, 100);
+$grisClair = array(230, 230, 230);
+$grisTresClair = array(248, 248, 248);
+$blanc = array(255, 255, 255);
 
 
 /*
- * TITRE
+ * ==========================================================
+ * 10. LOGO ENTREPRISE
+ * ==========================================================
  */
-$pdf->Cell(
-    0,
-    12,
-    'TARIFS ELECTROJUL',
-    0,
-    1,
-    'C'
+
+$logoExiste = false;
+
+if (!empty($conf->mycompany->dir_output)) {
+
+    $logodir = $conf->mycompany->dir_output;
+
+    if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
+        $logodir = $conf->mycompany->multidir_output[$conf->entity];
+    }
+
+    if (!empty($this_dummy = $this_dummy ?? null)) {
+        // Rien
+    }
+
+    if (!empty($GLOBALS['mysoc']->logo)) {
+
+        $logo = $logodir.'/logos/'.$GLOBALS['mysoc']->logo;
+
+        if (is_readable($logo)) {
+            $logoExiste = true;
+        }
+    }
+}
+
+
+/*
+ * ==========================================================
+ * 11. EN-TÊTE
+ * ==========================================================
+ */
+
+$top = 18;
+
+
+/*
+ * Logo
+ */
+
+if ($logoExiste) {
+
+    $heightLogo = pdf_getHeightForLogo($logo);
+
+    /*
+     * On limite la hauteur du logo
+     */
+    if ($heightLogo > 25) {
+        $heightLogo = 25;
+    }
+
+    $pdf->Image(
+        $logo,
+        15,
+        $top,
+        0,
+        $heightLogo
+    );
+
+} else {
+
+    /*
+     * Si aucun logo n'est disponible,
+     * afficher simplement le nom.
+     */
+
+    $pdf->SetFont(
+        'helvetica',
+        'B',
+        18
+    );
+
+    $pdf->SetTextColor(
+        $bleu[0],
+        $bleu[1],
+        $bleu[2]
+    );
+
+    $pdf->SetXY(15, $top);
+
+    $pdf->Cell(
+        70,
+        8,
+        'Electrojul',
+        0,
+        0,
+        'L'
+    );
+}
+
+
+/*
+ * ==========================================================
+ * 12. TITRE DU DOCUMENT
+ * ==========================================================
+ */
+
+$pdf->SetTextColor(
+    $bleu[0],
+    $bleu[1],
+    $bleu[2]
 );
 
-$pdf->Ln(4);
+$pdf->SetFont(
+    'helvetica',
+    'B',
+    20
+);
+
+$pdf->SetXY(
+    95,
+    $top + 2
+);
+
+$pdf->Cell(
+    100,
+    8,
+    'TARIFS',
+    0,
+    1,
+    'R'
+);
+
+
+$pdf->SetFont(
+    'helvetica',
+    '',
+    10
+);
+
+$pdf->SetTextColor(
+    $gris[0],
+    $gris[1],
+    $gris[2]
+);
+
+$pdf->SetXY(
+    95,
+    $top + 11
+);
+
+$pdf->Cell(
+    100,
+    5,
+    'Réparation électroménager',
+    0,
+    1,
+    'R'
+);
 
 
 /*
- * Sous-titre
+ * ==========================================================
+ * 13. LIGNE DE SÉPARATION
+ * ==========================================================
  */
-$pdf->SetFont($font, '', 11);
+
+$pdf->SetDrawColor(
+    $grisClair[0],
+    $grisClair[1],
+    $grisClair[2]
+);
+
+$pdf->SetLineWidth(0.4);
+
+$pdf->Line(
+    15,
+    48,
+    195,
+    48
+);
+
+
+/*
+ * ==========================================================
+ * 14. TITRE DE LA SECTION
+ * ==========================================================
+ */
+
+$pdf->SetTextColor(
+    $bleu[0],
+    $bleu[1],
+    $bleu[2]
+);
+
+$pdf->SetFont(
+    'helvetica',
+    'B',
+    13
+);
+
+$pdf->SetXY(
+    15,
+    57
+);
 
 $pdf->Cell(
-    0,
+    180,
     7,
-    'Dépannage et prestations électroménager',
+    'Nos tarifs',
     0,
     1,
-    'C'
+    'L'
 );
-
-$pdf->Ln(10);
 
 
 /*
- * Fonction d'écriture d'un tarif
+ * ==========================================================
+ * 15. TABLEAU DES TARIFS
+ * ==========================================================
  */
+
+$tableX = 15;
+$tableY = 68;
+
+$tableWidth = 180;
+
+$colNom = 140;
+$colPrix = 40;
+
+$rowHeight = 12;
+
+
+/*
+ * En-tête du tableau
+ */
+
+$pdf->SetFillColor(
+    $bleu[0],
+    $bleu[1],
+    $bleu[2]
+);
+
+$pdf->SetTextColor(
+    $blanc[0],
+    $blanc[1],
+    $blanc[2]
+);
+
+$pdf->SetFont(
+    'helvetica',
+    'B',
+    10
+);
+
+$pdf->SetXY(
+    $tableX,
+    $tableY
+);
+
+$pdf->Cell(
+    $colNom,
+    $rowHeight,
+    'Prestation',
+    1,
+    0,
+    'L',
+    true
+);
+
+$pdf->Cell(
+    $colPrix,
+    $rowHeight,
+    'Prix TTC',
+    1,
+    1,
+    'R',
+    true
+);
+
+
+/*
+ * ==========================================================
+ * 16. LIGNES TARIFS
+ * ==========================================================
+ */
+
+$pdf->SetFont(
+    'helvetica',
+    '',
+    10
+);
+
+$index = 0;
+
 foreach ($tarifs as $tarif) {
 
     $nom = $tarif['label'] ?? '';
 
-    $prix = isset($tarif['price_ttc'])
-        ? (float) $tarif['price_ttc']
-        : 0;
+    $prix = (float) ($tarif['price_ttc'] ?? 0);
+
+    /*
+     * Format français
+     */
+    $prixTexte = number_format(
+        $prix,
+        2,
+        ',',
+        ' '
+    ).' €';
 
 
     /*
-     * Cadre du tarif
+     * Alternance des lignes
      */
-    $x = $pdf->GetX();
-    $y = $pdf->GetY();
 
-    $largeur = 174;
-    $hauteur = 22;
+    if ($index % 2 === 0) {
+
+        $pdf->SetFillColor(
+            $blanc[0],
+            $blanc[1],
+            $blanc[2]
+        );
+
+    } else {
+
+        $pdf->SetFillColor(
+            $grisTresClair[0],
+            $grisTresClair[1],
+            $grisTresClair[2]
+        );
+    }
 
 
-    /*
-     * Fond blanc + bordure
-     */
-    $pdf->SetFillColor(255, 255, 255);
-    $pdf->SetDrawColor(225, 225, 225);
-
-    $pdf->RoundedRect(
-        $x,
-        $y,
-        $largeur,
-        $hauteur,
-        3,
-        '1111',
-        'DF'
+    $pdf->SetTextColor(
+        40,
+        40,
+        40
     );
 
 
     /*
-     * Nom du tarif
+     * Calcul de hauteur dynamique
+     * pour les descriptions longues.
      */
-    $pdf->SetXY($x + 5, $y + 5);
 
-    $pdf->SetFont($font, 'B', 11);
+    $nbLignes = max(
+        1,
+        ceil(
+            $pdf->GetStringWidth($nom) / ($colNom - 6)
+        )
+    );
+
+    $hauteur = max(
+        $rowHeight,
+        $nbLignes * 5
+    );
+
+
+    $x = $tableX;
+    $y = $pdf->GetY();
+
+
+    /*
+     * Nom
+     */
 
     $pdf->MultiCell(
-        125,
-        6,
+        $colNom,
+        $hauteur,
         $nom,
-        0,
+        1,
         'L',
+        true,
+        0,
+        $x,
+        $y,
+        true,
+        0,
         false,
-        0
+        true,
+        $hauteur,
+        'M'
     );
 
 
     /*
      * Prix
      */
-    $pdf->SetXY($x + 135, $y + 6);
 
-    $pdf->SetFont($font, 'B', 13);
-
-    $prixTexte = number_format(
-        $prix,
-        2,
-        ',',
-        ' '
-    ).' EUR TTC';
-
-    $pdf->Cell(
-        34,
-        8,
+    $pdf->MultiCell(
+        $colPrix,
+        $hauteur,
         $prixTexte,
+        1,
+        'R',
+        true,
+        1,
+        $x + $colNom,
+        $y,
+        true,
         0,
-        0,
-        'R'
+        false,
+        true,
+        $hauteur,
+        'M'
     );
 
 
-    /*
-     * Espace entre les tarifs
-     */
-    $pdf->SetY($y + $hauteur + 5);
+    $index++;
 }
 
 
 /*
- * Mention tarifaire
+ * ==========================================================
+ * 17. MENTIONS TARIFAIRES
+ * ==========================================================
  */
-$pdf->Ln(5);
 
-$pdf->SetFont($font, 'B', 9);
+$posY = $pdf->GetY() + 10;
 
-$mention1 =
-    "Le forfait total est dû lors d'une réparation réussie.\n".
-    "Le déplacement reste dû dans tous les cas.";
 
-$pdf->MultiCell(
-    0,
-    5,
-    $mention1,
-    0,
-    'C'
+/*
+ * Cadre des mentions
+ */
+
+$pdf->SetFillColor(
+    248,
+    248,
+    248
 );
 
-$pdf->Ln(2);
+$pdf->SetDrawColor(
+    $grisClair[0],
+    $grisClair[1],
+    $grisClair[2]
+);
 
-$pdf->SetFont($font, '', 9);
+$pdf->RoundedRect(
+    15,
+    $posY,
+    180,
+    32,
+    2,
+    '1234',
+    'DF'
+);
+
+
+/*
+ * Texte
+ */
+
+$pdf->SetTextColor(
+    60,
+    60,
+    60
+);
+
+$pdf->SetFont(
+    'helvetica',
+    'B',
+    9
+);
+
+$pdf->SetXY(
+    20,
+    $posY + 6
+);
 
 $pdf->MultiCell(
+    170,
+    5,
+    "Le forfait total est dû lors d'une réparation réussie.\nLe déplacement reste dû dans tous les cas.",
     0,
+    'C',
+    false
+);
+
+
+$pdf->SetFont(
+    'helvetica',
+    '',
+    9
+);
+
+$pdf->SetXY(
+    20,
+    $posY + 18
+);
+
+$pdf->MultiCell(
+    170,
     5,
     "Les pièces sont garanties 3 mois dans le cadre d'une utilisation normale.",
     0,
-    'C'
+    'C',
+    false
 );
 
 
 /*
- * Séparateur
+ * ==========================================================
+ * 18. DATE DE MISE À JOUR
+ * ==========================================================
  */
-$pdf->Ln(5);
 
-$pdf->SetDrawColor(225, 225, 225);
-
-$pdf->Line(
-    45,
-    $pdf->GetY(),
-    165,
-    $pdf->GetY()
-);
-
-
-/*
- * Date de mise à jour
- */
 if (!empty($dateMiseAJour)) {
 
     $timestamp = strtotime($dateMiseAJour);
 
     if ($timestamp !== false) {
 
-        $dateTexte = 'Tarifs mis à jour le '.date(
+        $dateTexte = date(
             'd/m/Y à H:i',
             $timestamp
         );
 
-        $pdf->Ln(5);
+    } else {
 
-        $pdf->SetFont($font, '', 8);
-
-        $pdf->SetTextColor(110, 110, 110);
-
-        $pdf->Cell(
-            0,
-            5,
-            $dateTexte,
-            0,
-            1,
-            'C'
-        );
+        $dateTexte = $dateMiseAJour;
     }
+
+} else {
+
+    $dateTexte = date(
+        'd/m/Y à H:i'
+    );
 }
 
 
-/*
- * Remettre la couleur du texte normale
- */
-$pdf->SetTextColor(0, 0, 0);
+$posY += 40;
+
+
+$pdf->SetTextColor(
+    $gris[0],
+    $gris[1],
+    $gris[2]
+);
+
+$pdf->SetFont(
+    'helvetica',
+    '',
+    8
+);
+
+$pdf->SetXY(
+    15,
+    $posY
+);
+
+$pdf->Cell(
+    180,
+    5,
+    'Tarifs mis à jour le '.$dateTexte,
+    0,
+    1,
+    'C'
+);
 
 
 /*
- * Génération du PDF
- *
- * IMPORTANT :
- * aucun echo / HTML / texte ne doit être envoyé
- * avant cette instruction.
+ * ==========================================================
+ * 19. PIED DE PAGE
+ * ==========================================================
  */
+
+$pageHeight = $pdf->getPageHeight();
+
+
+$pdf->SetDrawColor(
+    $grisClair[0],
+    $grisClair[1],
+    $grisClair[2]
+);
+
+$pdf->Line(
+    15,
+    $pageHeight - 18,
+    195,
+    $pageHeight - 18
+);
+
+
+$pdf->SetTextColor(
+    $gris[0],
+    $gris[1],
+    $gris[2]
+);
+
+$pdf->SetFont(
+    'helvetica',
+    '',
+    8
+);
+
+$pdf->SetXY(
+    15,
+    $pageHeight - 15
+);
+
+
+/*
+ * Nom de l'entreprise
+ */
+
+$nomEntreprise = 'Electrojul';
+
+if (!empty($mysoc->name)) {
+    $nomEntreprise = $mysoc->name;
+}
+
+
+$pdf->Cell(
+    120,
+    5,
+    $nomEntreprise,
+    0,
+    0,
+    'L'
+);
+
+
+/*
+ * Page
+ */
+
+$pdf->Cell(
+    60,
+    5,
+    'Tarifs - Page '.$pdf->getAliasNumPage().' / '.$pdf->getAliasNbPages(),
+    0,
+    1,
+    'R'
+);
+
+
+/*
+ * ==========================================================
+ * 20. SORTIE DU PDF
+ * ==========================================================
+ */
+
 $pdf->Output(
     'tarifs-electrojul.pdf',
     'I'
