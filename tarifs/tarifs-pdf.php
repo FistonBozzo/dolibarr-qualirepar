@@ -1,252 +1,132 @@
 <?php
 /**
- * Fiche tarifaire PDF publique - ElectroJul
+ * Fiche tarifaire publique ElectroJul
+ *
  * Fichier : htdocs/custom/qualirepar/tarifs-pdf.php
+ * Accès direct sans connexion Dolibarr.
  */
 
-date_default_timezone_set('Europe/Paris');
-
-/*
- * Ce fichier est volontairement appelable directement par URL.
- * Il ne contient donc PAS le classique :
- * die('This file must be called from Dolibarr');
- */
 define('NOLOGIN', 1);
 define('NOCSRFCHECK', 1);
 define('NOREQUIREUSER', 1);
 define('NOREQUIREMENU', 1);
 define('NOREQUIREHTML', 1);
+define('NOREQUIREAJAX', 1);
 
-/*
- * Chargement standard recommandé par Dolibarr pour un fichier de module.
- * Cette méthode fonctionne que le module soit dans /custom/qualirepar
- * ou directement dans /htdocs/qualirepar.
- */
-$res = 0;
-if (!$res && !empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-    $res = @include $_SERVER['CONTEXT_DOCUMENT_ROOT'].'/main.inc.php';
-}
-
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
-$tmp2 = realpath(__FILE__);
-$i = strlen($tmp) - 1;
-$j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
-    $i--;
-    $j--;
-}
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, $i + 1).'/main.inc.php')) {
-    $res = @include substr($tmp, 0, $i + 1).'/main.inc.php';
-}
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, $i + 1)).'/main.inc.php')) {
-    $res = @include dirname(substr($tmp, 0, $i + 1)).'/main.inc.php';
-}
-if (!$res && file_exists(__DIR__.'/../../main.inc.php')) {
-    $res = @include __DIR__.'/../../main.inc.php';
-}
-if (!$res && file_exists(__DIR__.'/../../../main.inc.php')) {
-    $res = @include __DIR__.'/../../../main.inc.php';
-}
-if (!$res) {
-    http_response_code(500);
-    die('Impossible de charger Dolibarr.');
-}
-
+require_once dirname(__DIR__, 2).'/main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/qualirepar/class/tarifs.class.php';
 
-/* Langue PDF */
-$outputlangs = new Translate('', $conf);
+global $conf, $langs, $mysoc, $db;
+
+$langs->loadLangs(array('main', 'companies', 'propal', 'bills'));
+$outputlangs = clone $langs;
 $outputlangs->setDefaultLang('fr_FR');
-$outputlangs->loadLangs(array('main', 'companies', 'bills', 'propal'));
 
-/* Société émettrice */
-$mysoc = new Societe($db);
-$mysoc->fetch($conf->entity);
+$mysoc->fetch(1);
 
-/* Tarifs du module */
 $tarifsObj = new QualiReparTarifs($db);
 $tarifs = $tarifsObj->getTarifs();
 $dateMiseAJour = $tarifsObj->getDateMiseAJour();
 
-usort($tarifs, static function ($a, $b) {
-    return ((int) ($a['ordre'] ?? 0)) <=> ((int) ($b['ordre'] ?? 0));
-});
+// Même mécanisme que les modèles PDF Dolibarr : le format est fourni à pdf_getInstance().
+$format = pdf_getFormat($outputlangs);
+$page_largeur = $format['width'];
+$page_hauteur = $format['height'];
+$pdf = pdf_getInstance($format);
 
-/* PDF A4 portrait */
-$pdf = pdf_getInstance('A4', 'P', 'mm', true, 'UTF-8', false);
-$default_font_size = pdf_getPDFFontSize($outputlangs);
+if (!$pdf) {
+    die('Impossible de créer le moteur PDF Dolibarr.');
+}
 
+$pdf->SetTitle('Tarifs - '.($mysoc->name ?: 'ElectroJul'));
+$pdf->SetAuthor($mysoc->name ?: 'ElectroJul');
+$pdf->SetSubject('Tarifs');
 $pdf->SetCreator('Dolibarr');
-$pdf->SetAuthor($mysoc->name);
-$pdf->SetTitle('Tarifs - '.$mysoc->name);
-$pdf->SetSubject('Fiche tarifaire');
-$pdf->SetKeywords('tarifs, ElectroJul, QualiRépar');
-$pdf->SetMargins(15, 48, 15);
-$pdf->SetHeaderMargin(0);
-$pdf->SetFooterMargin(0);
-$pdf->SetAutoPageBreak(true, 28);
-$pdf->setPrintHeader(false);
-$pdf->setPrintFooter(false);
-$pdf->AliasNbPages();
+$pdf->setAutoPageBreak(true, 0);
+
+if (class_exists('TCPDF')) {
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+}
 
 $pdf->AddPage();
 
-/* =========================
- * EN-TÊTE façon PDF Dolibarr
- * ========================= */
-pdf_pagehead($pdf, $outputlangs, 297);
+// En-tête Dolibarr : logo et société.
+pdf_pagehead($pdf, $outputlangs, $page_hauteur);
+
+$font = pdf_getPDFFont($outputlangs);
+$default_font_size = pdf_getPDFFontSize($outputlangs);
 
 $pdf->SetTextColor(0, 0, 60);
-$pdf->SetFont('', 'B', $default_font_size + 3);
+$pdf->SetFont($font, 'B', $default_font_size + 6);
+$pdf->SetXY(15, 48);
+$pdf->Cell($page_largeur - 30, 9, 'TARIFS', 0, 1, 'C');
 
-$w = 100;
-$posy = 12;
-$posx = 210 - 15 - $w;
+$pdf->SetFont($font, '', $default_font_size);
+$pdf->SetTextColor(80, 80, 80);
+$pdf->SetXY(15, 58);
+$pdf->Cell($page_largeur - 30, 5, 'Tarifs publics ElectroJul', 0, 1, 'C');
 
-/* Logo */
-if (!getDolGlobalInt('PDF_DISABLE_MYCOMPANY_LOGO') && !empty($mysoc->logo)) {
-    $logodir = $conf->mycompany->dir_output;
-    if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
-        $logodir = $conf->mycompany->multidir_output[$conf->entity];
-    }
-
-    if (!getDolGlobalInt('MAIN_PDF_USE_LARGE_LOGO') && !empty($mysoc->logo_small)) {
-        $logo = $logodir.'/logos/thumbs/'.$mysoc->logo_small;
-    } else {
-        $logo = $logodir.'/logos/'.$mysoc->logo;
-    }
-
-    if (is_readable($logo)) {
-        $height = pdf_getHeightForLogo($logo);
-        $pdf->Image($logo, 15, $posy, 0, min($height, 28));
-    }
-}
-
-/* Titre */
-$pdf->SetXY($posx, $posy);
-$pdf->MultiCell($w, 5, 'TARIFS', 0, 'R');
-
-$pdf->SetFont('', '', $default_font_size - 1);
-$pdf->SetXY($posx, $posy + 8);
-
-$coordonnees = $mysoc->name;
-if (!empty($mysoc->address)) {
-    $coordonnees .= "\n".$mysoc->address;
-}
-if (!empty($mysoc->zip) || !empty($mysoc->town)) {
-    $coordonnees .= "\n".trim($mysoc->zip.' '.$mysoc->town);
-}
-if (!empty($mysoc->phone)) {
-    $coordonnees .= "\nTél. : ".$mysoc->phone;
-}
-if (!empty($mysoc->email)) {
-    $coordonnees .= "\n".$mysoc->email;
-}
-
-$pdf->MultiCell($w, 4, $coordonnees, 0, 'R');
-
-$pdf->SetDrawColor(128, 128, 128);
-$pdf->Line(15, 43, 195, 43);
-
-/* =========================
- * TITRE
- * ========================= */
-$pdf->SetTextColor(0, 0, 60);
-$pdf->SetFont('', 'B', $default_font_size + 2);
-$pdf->SetXY(15, 52);
-$pdf->MultiCell(180, 6, 'NOS TARIFS', 0, 'L');
-
-$pdf->SetTextColor(0, 0, 0);
-$pdf->SetFont('', '', $default_font_size - 1);
-$pdf->SetXY(15, 60);
-
-$texteDate = 'Tarifs en vigueur';
 if (!empty($dateMiseAJour)) {
-    $texteDate .= ' - Mise à jour : '.$dateMiseAJour;
+    $pdf->SetXY(15, 63);
+    $pdf->Cell($page_largeur - 30, 5, 'Dernière mise à jour : '.$dateMiseAJour, 0, 1, 'C');
 }
-$pdf->MultiCell(180, 5, $texteDate, 0, 'L');
 
-/* =========================
- * TABLEAU DES TARIFS
- * ========================= */
-$y = 70;
-$left = 15;
-$labelWidth = 130;
-$priceWidth = 50;
-$rowHeight = 9;
+$left = 20;
+$right = 20;
+$tableWidth = $page_largeur - $left - $right;
+$nameWidth = $tableWidth - 45;
+$priceWidth = 45;
+$y = 75;
 
-$pdf->SetXY($left, $y);
 $pdf->SetFillColor(224, 224, 224);
 $pdf->SetTextColor(0, 0, 60);
-$pdf->SetFont('', 'B', $default_font_size);
-$pdf->Cell($labelWidth, $rowHeight, 'Prestation', 1, 0, 'L', true);
-$pdf->Cell($priceWidth, $rowHeight, 'Tarif TTC', 1, 1, 'R', true);
+$pdf->SetFont($font, 'B', $default_font_size);
+$pdf->SetXY($left, $y);
+$pdf->Cell($nameWidth, 8, 'Prestation', 1, 0, 'L', true);
+$pdf->Cell($priceWidth, 8, 'Tarif TTC', 1, 1, 'R', true);
 
-$pdf->SetFont('', '', $default_font_size);
+$pdf->SetFont($font, '', $default_font_size);
 $pdf->SetTextColor(0, 0, 0);
 
 foreach ($tarifs as $tarif) {
     $label = (string) ($tarif['label'] ?? '');
-    $prix = (float) ($tarif['price_ttc'] ?? 0);
+    $priceTtc = (float) ($tarif['price_ttc'] ?? 0);
 
-    $pdf->SetFillColor(255, 255, 255);
-    $pdf->Cell($labelWidth, $rowHeight, $label, 1, 0, 'L', true);
-    $pdf->Cell($priceWidth, $rowHeight, price($prix, 0, $outputlangs).' TTC', 1, 1, 'R', true);
+    $pdf->SetX($left);
+    $pdf->Cell($nameWidth, 8, $label, 1, 0, 'L');
+    $pdf->Cell($priceWidth, 8, price($priceTtc, 2, $outputlangs), 1, 1, 'R');
 }
 
-/* =========================
- * INFORMATIONS
- * ========================= */
 $y = $pdf->GetY() + 8;
-$pdf->SetTextColor(0, 0, 60);
-$pdf->SetFont('', 'B', $default_font_size);
-$pdf->SetXY(15, $y);
-$pdf->MultiCell(180, 5, 'Informations', 0, 'L');
-
-$pdf->SetTextColor(0, 0, 0);
-$pdf->SetFont('', '', $default_font_size - 1);
-$y = $pdf->GetY() + 2;
-
-$mentions = array(
-    'Le forfait est dû lors d’une réparation réussie.',
-    'Les pièces sont garanties 3 mois dans le cadre d’une utilisation normale.',
-    'Les tarifs affichés sont TTC.'
+$pdf->SetFont($font, '', $default_font_size - 1);
+$pdf->SetTextColor(60, 60, 60);
+$pdf->SetXY($left, $y);
+$pdf->MultiCell(
+    $tableWidth,
+    5,
+    "Le forfait est dû lors d'une réparation réussie.\nLes pièces sont garanties 3 mois dans le cadre d'une utilisation normale.",
+    0,
+    'L'
 );
 
-foreach ($mentions as $mention) {
-    $pdf->SetXY(18, $y);
-    $pdf->MultiCell(177, 5, '• '.$mention, 0, 'L');
-    $y = $pdf->GetY();
-}
-
-/* =========================
- * PIED DE PAGE DOlIBARR
- * ========================= */
-$showdetails = getDolGlobalInt('MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS', 0);
-
+// Pied de page natif Dolibarr.
 pdf_pagefoot(
     $pdf,
     $outputlangs,
     'PROPOSAL_FREE_TEXT',
     $mysoc,
-    15,
-    15,
-    297,
+    10,
+    10,
+    $page_hauteur,
     null,
-    $showdetails,
     0,
-    210,
+    0,
+    $page_largeur,
     ''
 );
 
-/* Sortie directe dans le navigateur */
-$nomFichier = 'tarifs';
-if (!empty($mysoc->name)) {
-    $nomFichier .= '-'.dol_sanitizeFileName($mysoc->name);
-}
-$nomFichier .= '.pdf';
-
-$pdf->Output($nomFichier, 'I');
+$pdf->Output('tarifs-electrojul.pdf', 'I');
 exit;
