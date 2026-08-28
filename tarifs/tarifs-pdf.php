@@ -95,39 +95,61 @@ $pdf->AddPage();
  */
 $font = pdf_getPDFFont($langs);
 
-$pdf->SetFont($font, 'B', 22);
+
+/*
+ * ==========================================================
+ * ENTÊTE TYPE DOLIBARR
+ * ==========================================================
+ */
+
+$marginleft = 18;
+$margintop  = 18;
+
+$pageWidth = $pdf->getPageWidth();
+
+$pdf->SetDrawColor(210,210,210);
+$pdf->SetFillColor(255,255,255);
+
+$pdf->Rect(
+    $marginleft,
+    $margintop,
+    $pageWidth - ($marginleft * 2),
+    45
+);
 
 
 /*
- * TITRE
+ * Titre
  */
+$pdf->SetXY($marginleft, $margintop + 6);
+
+$pdf->SetFont($font,'B',18);
+
 $pdf->Cell(
-    0,
-    12,
-    'TARIFS ELECTROJUL',
+    $pageWidth - ($marginleft * 2),
+    8,
+    'FICHE TARIFAIRE',
     0,
     1,
     'C'
 );
-
-$pdf->Ln(4);
 
 
 /*
  * Sous-titre
  */
-$pdf->SetFont($font, '', 11);
+$pdf->SetFont($font,'',10);
 
 $pdf->Cell(
-    0,
-    7,
-    'Dépannage et prestations électroménager',
+    $pageWidth - ($marginleft * 2),
+    6,
+    'Prestations et forfaits Electrojul',
     0,
     1,
     'C'
 );
 
-$pdf->Ln(10);
+$pdf->Ln(18);
 
 
 /*
