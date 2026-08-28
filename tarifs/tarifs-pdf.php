@@ -62,16 +62,16 @@ $default_font_size = pdf_getPDFFontSize($outputlangs);
 $pdf->SetTextColor(0, 0, 60);
 $pdf->SetFont($font, 'B', $default_font_size + 6);
 $pdf->SetXY(15, 48);
-$pdf->Cell($page_largeur - 30, 9, 'TARIFS', 0, 1, 'C');
+$pdf->Cell($page_largeur - 30, 9, "TARIFS", 0, 1, "C");
 
-$pdf->SetFont($font, '', $default_font_size);
+$pdf->SetFont($font, "", $default_font_size);
 $pdf->SetTextColor(80, 80, 80);
 $pdf->SetXY(15, 58);
-$pdf->Cell($page_largeur - 30, 5, 'Tarifs publics ElectroJul', 0, 1, 'C');
+$pdf->Cell($page_largeur - 30, 5, "Tarifs publics ElectroJul", 0, 1, "C");
 
 if (!empty($dateMiseAJour)) {
     $pdf->SetXY(15, 63);
-    $pdf->Cell($page_largeur - 30, 5, 'Dernière mise à jour : '.$dateMiseAJour, 0, 1, 'C');
+    $pdf->Cell($page_largeur - 30, 5, "Dernière mise à jour : ".$dateMiseAJour, 0, 1, "C");
 }
 
 $left = 20;
@@ -83,12 +83,12 @@ $y = 75;
 
 $pdf->SetFillColor(224, 224, 224);
 $pdf->SetTextColor(0, 0, 60);
-$pdf->SetFont($font, 'B', $default_font_size);
+$pdf->SetFont($font, "B", $default_font_size);
 $pdf->SetXY($left, $y);
-$pdf->Cell($nameWidth, 8, 'Prestation', 1, 0, 'L', true);
-$pdf->Cell($priceWidth, 8, 'Tarif TTC', 1, 1, 'R', true);
+$pdf->Cell($nameWidth, 8, "Prestation", 1, 0, "L", true);
+$pdf->Cell($priceWidth, 8, "Tarif TTC", 1, 1, "R", true);
 
-$pdf->SetFont($font, '', $default_font_size);
+$pdf->SetFont($font, "", $default_font_size);
 $pdf->SetTextColor(0, 0, 0);
 
 foreach ($tarifs as $tarif) {
@@ -96,12 +96,12 @@ foreach ($tarifs as $tarif) {
     $priceTtc = (float) ($tarif['price_ttc'] ?? 0);
 
     $pdf->SetX($left);
-    $pdf->Cell($nameWidth, 8, $label, 1, 0, 'L');
-    $pdf->Cell($priceWidth, 8, price($priceTtc, 2, $outputlangs), 1, 1, 'R');
+    $pdf->Cell($nameWidth, 8, $label, 1, 0, "L");
+    $pdf->Cell($priceWidth, 8, price($priceTtc, 2, $outputlangs), 1, 1, "R");
 }
 
 $y = $pdf->GetY() + 8;
-$pdf->SetFont($font, '', $default_font_size - 1);
+$pdf->SetFont($font, "", $default_font_size - 1);
 $pdf->SetTextColor(60, 60, 60);
 $pdf->SetXY($left, $y);
 $pdf->MultiCell(
@@ -109,14 +109,14 @@ $pdf->MultiCell(
     5,
     "Le forfait est dû lors d'une réparation réussie.\nLes pièces sont garanties 3 mois dans le cadre d'une utilisation normale.",
     0,
-    'L'
+    "L"
 );
 
 // Pied de page natif Dolibarr.
 pdf_pagefoot(
     $pdf,
     $outputlangs,
-    'PROPOSAL_FREE_TEXT',
+    "PROPOSAL_FREE_TEXT",
     $mysoc,
     10,
     10,
@@ -125,8 +125,8 @@ pdf_pagefoot(
     0,
     0,
     $page_largeur,
-    ''
+    ""
 );
 
-$pdf->Output('tarifs-electrojul.pdf', 'I');
+$pdf->Output("tarifs-electrojul.pdf", "I");
 exit;
