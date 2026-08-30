@@ -68,6 +68,11 @@ $marge_basse = 10;
 $corner_radius = 2;
 
 $pdf = pdf_getInstance('A4');
+
+// DÉSACTIVATION DU TRAIT ET EN-TÊTE AUTOMATIQUE DE TCPDF
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
+
 $default_font_size = pdf_getPDFFontSize($outputlangs);
 
 $pdf->SetAutoPageBreak(false);
@@ -75,7 +80,7 @@ $pdf->SetMargins($marge_gauche, $marge_haute, $marge_droite);
 $pdf->AddPage();
 
 // ------------------------------------------------------------------
-// EN-TÊTE DE PAGE (Sans pdf_pagehead = Sans trait supérieur)
+// EN-TÊTE DE PAGE MANUEL (Propre et sans ligne)
 // ------------------------------------------------------------------
 $posy = $marge_haute;
 $w = 100;
