@@ -18,44 +18,46 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
-global $conf, $langs, $mysoc, $db;
+global $conf, $langs, $mysoc;
 
 $outputlangs = $langs;
 $outputlangs->loadLangs(array("main", "bills", "products"));
 
 // ------------------------------------------------------------------
-// RÉCUPÉRATION DE LA DATE DE MAJ DEPUIS L'API TARIFS (Identique au site)
+// RÉCUPÉRATION DES TARIFS ET DE LA DATE VIA L'API PUBLIQUE
 // ------------------------------------------------------------------
 date_default_timezone_set('Europe/Paris');
 $apiUrl = 'https://electrojul.duckdns.org/custom/qualirepar/api/tarifs.php';
-
-$date_derniere_maj = '';
 
 $ch = curl_init($apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Évite les blocages de certificat local
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
 $json = curl_exec($ch);
 curl_close($ch);
 
+$tarifs = array();
+$date_derniere_maj = '';
+
 if ($json !== false && !empty($json)) {
-    $dataAPI = json_decode($json, true);
-    if (is_array($dataAPI) && !empty($dataAPI['updated_at'])) {
-        // Même formatage de date que sur votre site HTML
-        $date_derniere_maj = date('d/m/Y à H:i', strtotime($dataAPI['updated_at']));
+    $data = json_decode($json, true);
+    if (is_array($data) && !empty($data['success'])) {
+        $tarifs = $data['tarifs'] ?? array();
+        if (!empty($data['updated_at'])) {
+            $date_derniere_maj = date('d/m/Y à H:i', strtotime($data['updated_at']));
+        }
     }
 }
 
-// Sécurité si l'API ne répond pas
 if (empty($date_derniere_maj)) {
     $date_derniere_maj = date('d/m/Y à H:i');
 }
 
 // ------------------------------------------------------------------
-// CONFIGURATION PDF
+// CONFIGURATION DU PDF
 // ------------------------------------------------------------------
 $page_largeur = 210;
 $page_hauteur = 297;
@@ -73,7 +75,7 @@ $pdf->SetMargins($marge_gauche, $marge_haute, $marge_droite);
 $pdf->AddPage();
 
 // ------------------------------------------------------------------
-// EN-TÊTE DE PAGE
+// EN-TÊTE DE PAGE (Sans pdf_pagehead = Sans trait supérieur)
 // ------------------------------------------------------------------
 $posy = $marge_haute;
 $w = 100;
@@ -91,7 +93,7 @@ if (!getDolGlobalInt('PDF_DISABLE_MYCOMPANY_LOGO') && !empty($mysoc->logo)) {
     }
 }
 
-// Titre + Date du jour
+// Titre + Date du jour du document PDF
 $posx_title = $page_largeur - $marge_droite - $w;
 $pdf->SetFont('', 'B', $default_font_size + 3);
 $pdf->SetXY($posx_title, $posy);
@@ -103,7 +105,7 @@ $posy_date = $pdf->getY() + 2;
 $pdf->SetXY($posx_title, $posy_date);
 $pdf->MultiCell($w, 3, $outputlangs->transnoentities("Date")." : ".dol_print_date(time(), 'day', false, $outputlangs, true), '', 'R');
 
-// Pavé Émetteur
+// Pavé Émetteur (Cadre gris 230, 230, 230)
 $carac_emetteur = pdf_build_address($outputlangs, $mysoc, null, '', 0, 'source');
 
 $posy_emetteur = 40;
@@ -128,7 +130,7 @@ $pdf->SetFont('', '', $default_font_size - 1);
 $pdf->MultiCell($widthrecbox - 2, 3.5, $carac_emetteur, 0, 'L');
 
 // ------------------------------------------------------------------
-// TABLEAU DES TARIFS
+// TABLEAU DES TARIFS (Généré à partir de l'API)
 // ------------------------------------------------------------------
 $tab_top = 85;
 $tab_width = $page_largeur - $marge_gauche - $marge_droite;
@@ -143,16 +145,18 @@ $pdf->Cell(40, 6, "Tarif TTC", 1, 1, 'C', true);
 
 $pdf->SetFont('', '', $default_font_size - 1);
 
-$sql = "SELECT label, price_ttc FROM ".MAIN_DB_PREFIX."product WHERE tosell = 1 ORDER BY ref ASC";
-$resql = $db->query($sql);
-
-if ($resql) {
-    while ($obj = $db->fetch_object($resql)) {
+if (!empty($tarifs)) {
+    foreach ($tarifs as $tarif) {
         $pdf->SetX($marge_gauche);
-        $pdf->Cell(150, 5.5, $outputlangs->convToOutputCharset(dol_trunc($obj->label, 75)), 1, 0, 'L');
-        $pdf->Cell(40, 5.5, price($obj->price_ttc), 1, 1, 'R');
+        $nom_tarif = dol_trunc($tarif['nom'], 75);
+        $prix_format = number_format((float) $tarif['prix_ttc'], 2, ',', ' ').' €';
+        
+        $pdf->Cell(150, 5.5, $outputlangs->convToOutputCharset($nom_tarif), 1, 0, 'L');
+        $pdf->Cell(40, 5.5, $prix_format, 1, 1, 'R');
     }
-    $db->free($resql);
+} else {
+    $pdf->SetX($marge_gauche);
+    $pdf->Cell(190, 6, "Aucun tarif disponible.", 1, 1, 'C');
 }
 
 // ------------------------------------------------------------------
@@ -161,11 +165,11 @@ if ($resql) {
 $posy_note = $pdf->getY() + 5;
 $pdf->SetXY($marge_gauche, $posy_note);
 
-// Ligne 1 : En GRAS
+// Ligne 1 : Gras
 $pdf->SetFont('', 'B', $default_font_size - 2);
 $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Le forfait total est dû lors d'une réparation réussie. *Le déplacement reste dû dans tous les cas"), 0, 'C');
 
-// Lignes 2 & 3 : Texte normal + Date récupérée via l'API
+// Lignes 2 & 3 : Texte normal + Date de l'API
 $pdf->SetFont('', '', $default_font_size - 2);
 $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Les pièces sont garanties 3 mois dans le cadre d'une utilisation normale."), 0, 'C');
 $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Tarifs mis à jour le : ".$date_derniere_maj), 0, 'C');
