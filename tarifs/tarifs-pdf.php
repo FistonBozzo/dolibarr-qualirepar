@@ -176,6 +176,7 @@ $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Le forfait tot
 
 // Lignes 2 & 3 : Texte normal + Date de l'API
 $pdf->SetFont('', '', $default_font_size - 2);
+$pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("L'établissement du devis est gratuit"), 0, 'C');
 $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Les pièces sont garanties 3 mois dans le cadre d'une utilisation normale."), 0, 'C');
 $pdf->MultiCell($tab_width, 4, $outputlangs->convToOutputCharset("Tarifs mis à jour le : ".$date_derniere_maj), 0, 'C');
 
