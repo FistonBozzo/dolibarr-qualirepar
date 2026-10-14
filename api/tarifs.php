@@ -10,6 +10,7 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 $originsAutorisees = [
     'https://electrojul69.gitlab.io'
+    'https://electrojul.fr'
 ];
 
 if (in_array($origin, $originsAutorisees, true)) {
