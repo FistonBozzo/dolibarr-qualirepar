@@ -9,7 +9,7 @@
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 $originsAutorisees = [
-    'https://electrojul69.gitlab.io'
+    'https://electrojul69.gitlab.io',
     'https://electrojul.fr'
 ];
 
