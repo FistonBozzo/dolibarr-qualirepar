@@ -52,6 +52,29 @@ class modQualiRepar extends DolibarrModules
             ),
             'models' => 1
         );
+        
+        
+        /*
+         * AJOUT DU MENU : CA Encaissé
+         */
+        $this->menu = array();
+        $r = 0;
+
+        $this->menu[$r] = array(
+            'fk_menu' => 'fk_mainmenu=home',          // Rattache le menu au tableau de bord / accueil
+            'type' => 'left',                         // Menu de gauche
+            'titre' => 'CA Encaissé',                 // Nom affiché dans le menu
+            'mainmenu' => 'qualirepar',
+            'leftmenu' => 'qualirepar_ca',
+            'url' => '/custom/qualirepar/ca_encaisse.php', // Chemin vers votre fichier
+            'langs' => '',                            
+            'position' => 100,                        
+            'enabled' => '1',                         
+            'perms' => '1',                           
+            'target' => '',
+            'user' => 2                               
+        );
+        $r++;
 
         /*
          * Création des champs supplémentaires
