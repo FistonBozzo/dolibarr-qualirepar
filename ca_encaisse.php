@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2026 Auto-entrepreneur
  *
- * Page personnalisée : Chiffre d'affaires encaissé (Mois et Trimestre)
+ * Page personnalisée : Chiffre d'affaires encaissé (Mois et Trimestre en colonnes)
  */
 
 // Charger l'environnement Dolibarr
@@ -32,8 +32,14 @@ print '<input type="submit" class="button" value="Filtrer">';
 print '</td></tr></table>';
 print '</form>';
 
+// Tableau de correspondance des mois en français
+$noms_mois = array(
+    1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+    5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+    9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+);
 
-// Base commune de la requête SQL (CTE) pour éviter les doublons
+// Base commune de la requête SQL (CTE)
 $common_cte = "WITH invoice_totals AS (
     SELECT fk_facture, SUM(total_ht) AS total_ht
     FROM " . MAIN_DB_PREFIX . "facturedet
@@ -55,22 +61,19 @@ line_payments AS (
 
 
 // ==========================================
-// 1. TABLEAU : DÉTAIL PAR MOIS
+// 1. TABLEAU : DÉTAIL PAR MOIS (EN COLONNES)
 // ==========================================
 print '<div style="font-size: 1.2em; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">1. Détail par mois</div>';
 
 $sql_mois = $common_cte . "
 SELECT 
-    DATE_FORMAT(datep, '%Y-%m') AS periode,
-    CASE product_type 
-        WHEN 0 THEN 'Marchandises / Produits' 
-        WHEN 1 THEN 'Prestations de services' 
-        ELSE 'Autre' 
-    END AS type_activite,
-    ROUND(SUM(allocated_amount), 2) AS ca_encaisse
+    MONTH(datep) AS mois_num,
+    ROUND(SUM(CASE WHEN product_type = 0 THEN allocated_amount ELSE 0 END), 2) AS ca_produits,
+    ROUND(SUM(CASE WHEN product_type = 1 THEN allocated_amount ELSE 0 END), 2) AS ca_services,
+    ROUND(SUM(allocated_amount), 2) AS ca_total
 FROM line_payments
-GROUP BY DATE_FORMAT(datep, '%Y-%m'), product_type
-ORDER BY periode DESC, product_type;";
+GROUP BY MONTH(datep)
+ORDER BY mois_num DESC;";
 
 $resql_mois = $db->query($sql_mois);
 
@@ -79,20 +82,23 @@ if ($resql_mois) {
     print '<table class="tagtable liste" width="100%">';
     print '<tr class="liste_titre">';
     print '<td>Mois</td>';
-    print '<td>Type d\'activité</td>';
-    print '<td class="right">CA Encaissé (HT)</td>';
+    print '<td class="right">Produits / Marchandises (HT)</td>';
+    print '<td class="right">Prestations de services (HT)</td>';
+    print '<td class="right">Total Encaissé (HT)</td>';
     print '</tr>';
 
     if ($db->num_rows($resql_mois) > 0) {
         while ($obj = $db->fetch_object($resql_mois)) {
+            $nom_mois = isset($noms_mois[$obj->mois_num]) ? $noms_mois[$obj->mois_num] : 'Mois ' . $obj->mois_num;
             print '<tr class="oddeven">';
-            print '<td>' . $obj->periode . '</td>';
-            print '<td>' . $obj->type_activite . '</td>';
-            print '<td class="right"><b>' . price($obj->ca_encaisse) . ' €</b></td>';
+            print '<td><b>' . $nom_mois . '</b></td>';
+            print '<td class="right">' . price($obj->ca_produits) . ' €</td>';
+            print '<td class="right">' . price($obj->ca_services) . ' €</td>';
+            print '<td class="right"><b>' . price($obj->ca_total) . ' €</b></td>';
             print '</tr>';
         }
     } else {
-        print '<tr><td colspan="3" class="opacitymedium">Aucun encaissement trouvé pour l\'année ' . $annee . '.</td></tr>';
+        print '<tr><td colspan="4" class="opacitymedium">Aucun encaissement trouvé pour l\'année ' . $annee . '.</td></tr>';
     }
     print '</table>';
     print '</div>';
@@ -103,22 +109,19 @@ if ($resql_mois) {
 
 
 // ==========================================
-// 2. TABLEAU : RÉCAPITULATIF PAR TRIMESTRE
+// 2. TABLEAU : RÉCAPITULATIF PAR TRIMESTRE (EN COLONNES)
 // ==========================================
 print '<div style="font-size: 1.2em; font-weight: bold; margin: 30px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">2. Récapitulatif par trimestre (Urssaf)</div>';
 
 $sql_trimestre = $common_cte . "
 SELECT 
     QUARTER(datep) AS trimestre,
-    CASE product_type 
-        WHEN 0 THEN 'Marchandises / Produits' 
-        WHEN 1 THEN 'Prestations de services' 
-        ELSE 'Autre' 
-    END AS type_activite,
-    ROUND(SUM(allocated_amount), 2) AS ca_encaisse
+    ROUND(SUM(CASE WHEN product_type = 0 THEN allocated_amount ELSE 0 END), 2) AS ca_produits,
+    ROUND(SUM(CASE WHEN product_type = 1 THEN allocated_amount ELSE 0 END), 2) AS ca_services,
+    ROUND(SUM(allocated_amount), 2) AS ca_total
 FROM line_payments
-GROUP BY QUARTER(datep), product_type
-ORDER BY trimestre ASC, product_type;";
+GROUP BY QUARTER(datep)
+ORDER BY trimestre ASC;";
 
 $resql_trimestre = $db->query($sql_trimestre);
 
@@ -127,20 +130,22 @@ if ($resql_trimestre) {
     print '<table class="tagtable liste" width="100%">';
     print '<tr class="liste_titre">';
     print '<td>Trimestre</td>';
-    print '<td>Type d\'activité</td>';
-    print '<td class="right">CA Encaissé (HT)</td>';
+    print '<td class="right">Produits / Marchandises (HT)</td>';
+    print '<td class="right">Prestations de services (HT)</td>';
+    print '<td class="right">Total Encaissé (HT)</td>';
     print '</tr>';
 
     if ($db->num_rows($resql_trimestre) > 0) {
         while ($obj_trim = $db->fetch_object($resql_trimestre)) {
             print '<tr class="oddeven">';
-            print '<td>T' . $obj_trim->trimestre . ' ' . $annee . '</td>';
-            print '<td>' . $obj_trim->type_activite . '</td>';
-            print '<td class="right"><b>' . price($obj_trim->ca_encaisse) . ' €</b></td>';
+            print '<td><b>T' . $obj_trim->trimestre . ' ' . $annee . '</b></td>';
+            print '<td class="right">' . price($obj_trim->ca_produits) . ' €</td>';
+            print '<td class="right">' . price($obj_trim->ca_services) . ' €</td>';
+            print '<td class="right"><b>' . price($obj_trim->ca_total) . ' €</b></td>';
             print '</tr>';
         }
     } else {
-        print '<tr><td colspan="3" class="opacitymedium">Aucun encaissement trimestriel trouvé pour l\'année ' . $annee . '.</td></tr>';
+        print '<tr><td colspan="4" class="opacitymedium">Aucun encaissement trimestriel trouvé pour l\'année ' . $annee . '.</td></tr>';
     }
     print '</table>';
     print '</div>';
