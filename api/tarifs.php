@@ -6,6 +6,17 @@
  * Elle permet uniquement de consulter les tarifs publics.
  */
 
+
+// Autoriser les requêtes depuis tous les domaines (CORS)
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Accept, Content-Type');
+
+// Type de réponse
+header('Content-Type: application/json; charset=utf-8');
+
+
+/*
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 $originsAutorisees = [
@@ -21,6 +32,7 @@ if (in_array($origin, $originsAutorisees, true)) {
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Accept, Content-Type');
 header('Content-Type: application/json; charset=utf-8');
+*/
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
