@@ -1556,10 +1556,12 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 		// Loop on each payment
 		// TODO Call getListOfPayments instead of hard coded sql
 		$sql = "SELECT p.datep as date, p.fk_paiement, p.num_paiement as num, pf.amount as amount, pf.multicurrency_amount,";
-		$sql .= " cp.code";
+		$sql .= " cp.code, b.fk_account";
 		$sql .= " FROM ".MAIN_DB_PREFIX."paiement_facture as pf, ".MAIN_DB_PREFIX."paiement as p";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_paiement as cp ON p.fk_paiement = cp.id";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."bank as b ON p.fk_bank = b.rowid";
 		$sql .= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = ".((int) $object->id);
+		$sql .= " AND (b.fk_account IS NULL OR b.fk_account <> 2)";
 		//$sql.= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = 1";
 		$sql .= " ORDER BY p.datep";
 
@@ -2593,6 +2595,25 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 		$creditnoteamount = $object->getSumCreditNotesUsed((isModEnabled("multicurrency") && $object->multicurrency_tx != 1) ? 1 : 0); // Warning, this also include excess received
 		$depositsamount = $object->getSumDepositsUsed((isModEnabled("multicurrency") && $object->multicurrency_tx != 1) ? 1 : 0);
 
+		// Montant affiche comme paye : exclure les reglements verses sur le compte QUALI (ID 2).
+		// Le calcul comptable de $deja_regle et du solde reste inchange.
+		$deja_regle_affiche = $deja_regle;
+		$sql_qualirepar = "SELECT SUM(pf.amount) as amount, SUM(pf.multicurrency_amount) as multicurrency_amount";
+		$sql_qualirepar .= " FROM ".MAIN_DB_PREFIX."paiement_facture as pf";
+		$sql_qualirepar .= " INNER JOIN ".MAIN_DB_PREFIX."paiement as p ON pf.fk_paiement = p.rowid";
+		$sql_qualirepar .= " INNER JOIN ".MAIN_DB_PREFIX."bank as b ON p.fk_bank = b.rowid";
+		$sql_qualirepar .= " WHERE pf.fk_facture = ".((int) $object->id)." AND b.fk_account = 2";
+		$resql_qualirepar = $this->db->query($sql_qualirepar);
+		if ($resql_qualirepar) {
+			$obj_qualirepar = $this->db->fetch_object($resql_qualirepar);
+			if ($obj_qualirepar && $obj_qualirepar->amount !== null) {
+				$montant_qualirepar = (isModEnabled("multicurrency") && $object->multicurrency_tx != 1)
+					? (float) $obj_qualirepar->multicurrency_amount
+					: (float) $obj_qualirepar->amount;
+				$deja_regle_affiche = price2num($deja_regle - $montant_qualirepar, 'MT');
+			}
+		}
+
 		$resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
 		if (!isModEnabled("multicurrency") || $object->multicurrency_tx == 1 || getDolGlobalInt('MULTICURRENCY_SHOW_ALSO_MAIN_CURRENCY_ON_PDF') == 0) {
 			// Not used in this case, initialized to avoid CI warnings
@@ -2618,7 +2639,7 @@ class pdf_spongequalirepar extends ModelePDFFactures{
 			$pdf->MultiCell($col2x - $col1x, $tab2_hl, $outputlangs->transnoentities("Paid").(is_object($outputlangsbis) ? ' / '.$outputlangsbis->transnoentities("Paid") : ''), 0, 'L', false);
 			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 			//if (!isModEnabled("multicurrency") || $object->multicurrency_tx == 1 || getDolGlobalInt('MULTICURRENCY_SHOW_ALSO_MAIN_CURRENCY_ON_PDF') == 0) {
-			$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle + $depositsamount, 0, $outputlangs), 0, 'R', false);
+			$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle_affiche + $depositsamount, 0, $outputlangs), 0, 'R', false);
 			//} else {
 			//		$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle + $depositsamount, 0, $outputlangs), 0, 'R', false);
 			//
